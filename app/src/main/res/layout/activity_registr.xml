@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:tools="http://schemas.android.com/tools" xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="#4E4E4E"
+        tools:context=".LoginActivity">
+
+    <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textInputLayoutPasswordReg"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="490dp"
+            android:layout_marginEnd="60dp"
+            android:hint="Повторите пароль"
+            android:visibility="invisible"
+            app:passwordToggleEnabled="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:startIconDrawable="@drawable/lock"
+            app:helperTextTextColor="#FF0000"
+            app:counterEnabled="true"
+            app:counterMaxLength="32"
+            app:counterTextColor="@color/white"
+            tools:ignore="HardcodedText,MissingConstraints"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:prefixTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:hintTextColor="@color/white"
+            app:layout_constraintHorizontal_bias="1.0" tools:visibility="invisible">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/textInputEditTextPasswordReg"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:layout_width="match_parent"
+                android:inputType="textPassword"
+                android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textInputLayoutRepeatPasswordReg"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="390dp"
+            android:layout_marginEnd="60dp"
+            android:hint="Пароль"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="invisible"
+            app:startIconDrawable="@drawable/lock"
+            app:passwordToggleEnabled="true"
+            app:helperTextTextColor="#FF0000"
+            app:counterEnabled="true"
+            app:counterMaxLength="32"
+            app:counterTextColor="@color/white"
+            tools:ignore="HardcodedText,MissingConstraints"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:prefixTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:hintTextColor="@color/white" app:layout_constraintHorizontal_bias="1.0">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/textInputEditTextPasswordRepeatReg"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:layout_width="match_parent"
+                android:inputType="textPassword"
+                android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textInputLayoutTelephoneReg"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="290dp"
+            android:layout_marginEnd="60dp"
+            android:hint="Номер телефона"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:startIconDrawable="@drawable/telephone"
+            app:helperTextTextColor="#FF0000"
+            app:counterEnabled="true"
+            android:visibility="invisible"
+            app:counterMaxLength="10"
+            app:counterTextColor="@color/white"
+            app:prefixText="+7"
+            tools:ignore="HardcodedText,MissingConstraints"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:prefixTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:hintTextColor="@color/white" app:layout_constraintHorizontal_bias="1.0">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/textInputEditTextTelephoneReg"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:inputType="phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="DuplicateIds"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textInputLayoutLoginReg"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="190dp"
+            android:layout_marginEnd="60dp"
+            android:hint="Логин"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:startIconDrawable="@drawable/person"
+            app:helperTextTextColor="#FF0000"
+            app:counterEnabled="true"
+            app:counterMaxLength="24"
+            app:counterTextColor="@color/white"
+            app:prefixText="+7"
+            android:visibility="invisible"
+            tools:ignore="HardcodedText,MissingConstraints"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:prefixTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:hintTextColor="@color/white" app:layout_constraintHorizontal_bias="1.0">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/textInputEditTextLoginReg"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:inputType="phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="DuplicateIds"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+            android:text="Регистрация"
+            android:layout_width="412dp"
+            android:textColor="@color/white"
+            android:layout_height="68dp"
+            android:id="@+id/textViewVillageReg"
+            android:autoSizeTextType="uniform"
+            android:gravity="center"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.1"
+            android:visibility="invisible"
+            tools:ignore="HardcodedText"/>
+    <Button
+            android:text="Зарегистрироваться"
+            android:textSize="10sp"
+            android:layout_width="224dp"
+            android:textColor="@android:color/black"
+            android:layout_height="72dp" android:id="@+id/buttonReg"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.855"
+            tools:ignore="HardcodedText,SmallSp"
+            app:backgroundTint="@color/white"
+            app:cornerRadius="81dp"
+            android:visibility="invisible"
+            tools:visibility="invisible"
+    />
+    <TextView
+            android:text="Вернуться"
+            android:layout_width="403dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="15sp"
+            android:layout_height="18dp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:visibility="invisible"
+            android:id="@+id/textViewReg"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.094" tools:ignore="HardcodedText"
+            app:layout_constraintTop_toBottomOf="@+id/buttonReg"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
