@@ -1,10 +1,19 @@
 package com.example.application;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Bundle;
+import android.widget.Button;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -12,7 +21,7 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class IncidentFragment extends Fragment {
-
+    View inflatedView = null;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -56,7 +65,19 @@ public class IncidentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_incident, container, false);
+        this.inflatedView =  inflater.inflate(R.layout.fragment_incident, container, false);
+        Button redButton = inflatedView.findViewById(R.id.button);
+        redButton.setOnClickListener(v -> {
+            NotificationCompat.Builder builder =
+                    new NotificationCompat.Builder(inflater.getContext())
+                            .setSmallIcon(R.drawable.bell)
+                            .setContentTitle("Title")
+                            .setContentText("Notification text");
+            Notification notification = builder.build();
+            NotificationManager notificationManager =
+                    (NotificationManager) inflatedView.getContext().getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(1, notification);
+        });
+        return inflatedView;
     }
 }

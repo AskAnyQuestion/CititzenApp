@@ -1,14 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context=".ProfileFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="match_parent"
+                                                   tools:context=".ProfileFragment"
+                                                   android:background="#262526"
+                                                   app:layout_constraintStart_toStartOf="parent"
+                                                   app:layout_constraintEnd_toEndOf="parent"
+                                                   app:layout_constraintTop_toTopOf="parent"
+                                                   app:layout_constraintBottom_toBottomOf="parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="413dp"
+                                                       android:layout_height="746dp"
+                                                       tools:context=".ProfileFragment"
+                                                       android:background="@color/black"
+                                                       tools:ignore="MissingConstraints"
+                                                       app:layout_constraintStart_toStartOf="parent"
+                                                       app:layout_constraintEnd_toEndOf="parent"
+                                                       app:layout_constraintTop_toTopOf="parent"
+                                                       app:layout_constraintBottom_toBottomOf="parent"
+                                                       app:layout_constraintVertical_bias="1.0"
+                                                       app:layout_constraintHorizontal_bias="1.0">
+
+        <TextView
+                android:text="Вопрос - ответ"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:autoSizeTextType="uniform"
+                android:layout_width="148dp"
+                android:layout_height="26dp" android:id="@+id/textViewEnterLogin6"
+                tools:ignore="HardcodedText,MissingConstraints" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_bias="0.456"
+                android:layout_marginTop="80dp"
+                app:layout_constraintHorizontal_bias="0.498"/>
+        <ImageView
+                android:src="@drawable/question"
+                android:layout_width="24sp"
+                android:layout_height="24sp" android:id="@+id/imageView7"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                tools:ignore="ContentDescription,MissingConstraints" app:layout_constraintHorizontal_bias="0.214"
+                app:layout_constraintVertical_bias="0.518"/>
+        <TextView
+                android:text="Настройки"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:autoSizeTextType="uniform"
+                android:layout_width="115dp"
+                android:layout_height="24dp" android:id="@+id/textViewEnterLogin5"
+                tools:ignore="HardcodedText,MissingConstraints" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_bias="0.381"
+                android:layout_marginTop="80dp"
+                app:layout_constraintHorizontal_bias="0.422"/>
+        <TextView
+                android:text="Правила и условия использования"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:textColor="#BEBEBE"
+                android:textSize="20sp"
+                android:autoSizeTextType="uniform"
+                android:layout_width="273dp"
+                android:layout_height="33dp" android:id="@+id/textViewEnterLogin2"
+                tools:ignore="HardcodedText,MissingConstraints" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_bias="0.739" app:layout_constraintHorizontal_bias="0.31"
+                android:layout_marginTop="80dp"
+                android:layout_marginStart="38dp"/>
+        <TextView
+                android:text="Политика конфиденциальности"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:textColor="#BEBEBE"
+                android:textSize="20sp"
+                android:autoSizeTextType="uniform"
+                android:layout_width="244dp"
+                android:layout_height="30dp" android:id="@+id/textViewEnterLogin3"
+                tools:ignore="HardcodedText,MissingConstraints" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_bias="0.086" app:layout_constraintHorizontal_bias="0.348"
+                android:layout_marginStart="38dp" app:layout_constraintTop_toBottomOf="@+id/textViewEnterLogin2"/>
+        <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile_image"
+                android:layout_width="110dp"
+                android:layout_height="104dp"
+                android:src="@drawable/profile"
+                app:civ_border_width="2dp"
+                app:civ_border_color="#FF000000" tools:ignore="MissingConstraints"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0.498" app:layout_constraintVertical_bias="0.082"/>
+        <TextView
+                android:text="Ростислав Осликов"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:autoSizeTextType="uniform"
+                android:layout_width="325dp"
+                android:layout_height="36dp" android:id="@+id/textViewEnterLogin"
+                tools:ignore="HardcodedText,MissingConstraints" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_bias="0.165"
+                android:layout_marginTop="80dp"
+                app:layout_constraintHorizontal_bias="0.511"/>
+        <ImageView
+                android:src="@drawable/twitter"
+                android:layout_width="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_height="24dp" android:id="@+id/imageView4"
+                tools:ignore="ContentDescription,HardcodedText,MissingConstraints"
+                app:layout_constraintHorizontal_bias="0.498" app:layout_constraintVertical_bias="0.669"/>
+        <ImageView
+                android:src="@drawable/instagram"
+                android:layout_width="24dp"
+                android:layout_height="24dp" android:id="@+id/imageView5"
+                app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="92dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="ContentDescription,HardcodedText,MissingConstraints"
+                app:layout_constraintHorizontal_bias="0.427" app:layout_constraintVertical_bias="0.669"/>
+        <ImageView
+                android:src="@drawable/facebook"
+                android:layout_width="24dp"
+                android:layout_height="24dp" android:id="@+id/imageView3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="92dp"
+                tools:ignore="ContentDescription,HardcodedText,MissingConstraints"
+                app:layout_constraintHorizontal_bias="0.569" app:layout_constraintVertical_bias="0.669"/>
+        <ImageView
+                android:src="@drawable/gear"
+                android:layout_width="24sp"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_height="24sp" android:id="@+id/imageView6"
+                tools:ignore="ContentDescription,HardcodedText,MissingConstraints"
+                app:layout_constraintHorizontal_bias="0.214" app:layout_constraintVertical_bias="0.451"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/hello_blank_fragment"/>
+            android:text="Редактировать"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:autoSizeTextType="uniform"
+            android:layout_width="187dp"
+            android:layout_height="26dp" android:id="@+id/textViewEnterLogin4"
+            tools:ignore="HardcodedText,MissingConstraints"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="1.0" app:layout_constraintVertical_bias="0.019"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-</FrameLayout>

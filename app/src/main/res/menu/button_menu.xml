@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Главная"
+          android:id="@+id/home"
+          android:icon="@drawable/ic_baseline_add_home_24"/>
+    <item android:title="Профиль"
+          android:id="@+id/profile"
+          android:icon="@drawable/ic_baseline_accessibility_24"/>
+    <item android:title=""
+          android:id="@+id/add"
+          android:icon="@drawable/ic_baseline_add_24"/>
+    <item android:title="Новости"
+          android:id="@+id/news"
+          android:icon="@drawable/ic_baseline_add_to_queue_24"/>
+    <item android:title="Срочно"
+          android:id="@+id/alarm"
+          android:icon="@drawable/ic_baseline_alarm_24"/>
+</menu>

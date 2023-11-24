@@ -1,38 +1,36 @@
 package com.example.application;
 
-import android.graphics.Color;
-import android.graphics.PointF;
-import android.widget.Button;
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+import android.view.MenuItem;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.Manifest;
 
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKit;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
-import com.yandex.mapkit.layers.ObjectEvent;
 import com.yandex.mapkit.map.CameraPosition;
-import com.yandex.mapkit.map.CompositeIcon;
-import com.yandex.mapkit.map.IconStyle;
-import com.yandex.mapkit.map.RotationType;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.user_location.UserLocationLayer;
-import com.yandex.mapkit.user_location.UserLocationObjectListener;
-import com.yandex.mapkit.user_location.UserLocationView;
-import com.yandex.runtime.image.ImageProvider;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class HomeActivity extends AppCompatActivity implements UserLocationObjectListener {
+public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
     public String MAPKIT_API_KEY;
     private MapView mapView;
-    private UserLocationLayer userLocationLayer;
-    
+    BottomNavigationView bottomNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Properties properties = new Properties();
@@ -47,19 +45,34 @@ public class HomeActivity extends AppCompatActivity implements UserLocationObjec
         MapKitFactory.initialize(this);
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
-        mapView = findViewById(R.id.mapview);
+        init();
         mapView.getMap().setNightModeEnabled(true);
         mapView.getMap().setRotateGesturesEnabled(false);
         mapView.getMap().move(new CameraPosition(
-                new Point(57.2207130348043, 41.92593470290738),
-                14, 0, 0), new Animation(Animation.Type.SMOOTH, 3f),
+                        new Point(57, 40.59),
+                        14, 0, 0), new Animation(Animation.Type.SMOOTH, 3f),
                 null);
-        MapKit mapKit = MapKitFactory.getInstance();
-        userLocationLayer = mapKit.createUserLocationLayer(mapView.getMapWindow());
-        userLocationLayer.setVisible(true);
-        userLocationLayer.setHeadingEnabled(true);
-        userLocationLayer.setObjectListener(this);
+        if (requestLocationPermission()) {
+            MapKit mapKit = MapKitFactory.getInstance();
+            UserLocationLayer locationLayer = mapKit.createUserLocationLayer(mapView.getMapWindow());
+            locationLayer.setVisible(true);
+        }
+        bottomNavigationView
+                .setOnNavigationItemSelectedListener(this);
+        bottomNavigationView.setSelectedItemId(R.id.home);
+    }
 
+    private void init() {
+        bottomNavigationView
+                = findViewById(R.id.bottomNavigationView);
+        mapView = findViewById(R.id.mapview);
+    }
+
+    private boolean requestLocationPermission() {
+        return (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                && (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                && (ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED)
+                && (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED);
     }
 
     @Override
@@ -71,27 +84,50 @@ public class HomeActivity extends AppCompatActivity implements UserLocationObjec
 
     @Override
     protected void onStart() {
-        super.onStart();
-        MapKitFactory.getInstance().onStart();
         mapView.onStart();
+        MapKitFactory.getInstance().onStart();
+        super.onStart();
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
-    public void onObjectAdded(UserLocationView userLocationView) {
-        userLocationLayer.setAnchor(
-                new PointF((float)(mapView.getWidth() * 0.5), (float)(mapView.getHeight() * 0.5)),
-                new PointF((float)(mapView.getWidth() * 0.5), (float)(mapView.getHeight() * 0.83)));
+    public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.home:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frame_layout, new HomeFragment())
+                        .commit();
+                return true;
 
-        userLocationView.getArrow().setIcon(ImageProvider.fromResource(
-                this, R.drawable.user_arrow));
-        userLocationView.getAccuracyCircle().setFillColor(Color.BLUE & 0x99ffffff);
-    }
+            case R.id.profile:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frame_layout, new ProfileFragment())
+                        .commit();
+                return true;
 
-    @Override
-    public void onObjectRemoved(@NotNull UserLocationView view) {
-    }
+            case R.id.add:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frame_layout, new IncidentFragment())
+                        .commit();
+                return true;
 
-    @Override
-    public void onObjectUpdated(@NotNull UserLocationView view, @NotNull ObjectEvent event) {
+            case R.id.news:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frame_layout, new NewsFragment())
+                        .commit();
+                return true;
+
+            case R.id.alarm:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frame_layout, new AlarmFragment())
+                        .commit();
+                return true;
+        }
+        return false;
     }
 }
