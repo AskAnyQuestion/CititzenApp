@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Properties;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -49,13 +50,14 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         mapView.getMap().setNightModeEnabled(true);
         mapView.getMap().setRotateGesturesEnabled(false);
         mapView.getMap().move(new CameraPosition(
-                        new Point(57, 40.59),
-                        14, 0, 0), new Animation(Animation.Type.SMOOTH, 3f),
+                        new Point(57.21, 41.90),
+                        14, 0, 0), new Animation(Animation.Type.SMOOTH, 1f),
                 null);
         if (requestLocationPermission()) {
             MapKit mapKit = MapKitFactory.getInstance();
             UserLocationLayer locationLayer = mapKit.createUserLocationLayer(mapView.getMapWindow());
             locationLayer.setVisible(true);
+            locationLayer.setHeadingEnabled(true);
         }
         bottomNavigationView
                 .setOnNavigationItemSelectedListener(this);
