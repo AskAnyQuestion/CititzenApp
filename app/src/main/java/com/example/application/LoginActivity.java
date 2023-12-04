@@ -8,8 +8,10 @@ import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 public class LoginActivity extends AppCompatActivity {
@@ -20,6 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout textInputLayoutPassword;
     private TextInputLayout textInputLayoutTelephone;
     private TextView textViewRegistr;
+    private TextInputEditText textInputEditTextTelephoneLogin, textInputEditTextPasswordLogin;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -60,8 +63,18 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void openHomeActivity() {
-        Intent intent = new Intent(this, HomeActivity.class);
-        startActivity(intent);
+        Long phone = Long.parseLong("8".concat(textInputEditTextTelephoneLogin.getEditableText().toString()));
+        String password = textInputEditTextPasswordLogin.getEditableText().toString();
+        if (password.equals("")) {
+            Toast.makeText(LoginActivity.this, "Пожалуйста, заполните все поля", Toast.LENGTH_LONG).show();
+        } else {
+            DbHelper dbHelper = new DbHelper(this);
+            if (dbHelper.checkUser(phone, password)) {
+                Intent intent = new Intent(this, HomeActivity.class);
+                startActivity(intent);
+            } else
+                Toast.makeText(LoginActivity.this, "Ошибка входа", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void openRegistrActivity() {
@@ -86,6 +99,8 @@ public class LoginActivity extends AppCompatActivity {
         textInputLayoutPassword = findViewById(R.id.textInputLayoutPasswordLogin);
         textInputLayoutTelephone = findViewById(R.id.textInputLayoutTelephoneLogin);
         textViewRegistr = findViewById(R.id.textViewRegistrLogin);
+        textInputEditTextTelephoneLogin = findViewById(R.id.textInputEditTextTelephoneLogin);
+        textInputEditTextPasswordLogin = findViewById(R.id.textInputEditTextPasswordLogin);
     }
 
     private boolean isNotFirstRun() {

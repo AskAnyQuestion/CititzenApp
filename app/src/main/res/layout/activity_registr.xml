@@ -35,7 +35,7 @@
             app:layout_constraintHorizontal_bias="1.0" tools:visibility="invisible">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/textInputEditTextPasswordReg"
+                android:id="@+id/textInputEditTextPasswordRepeatReg"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
                 android:layout_width="match_parent"
@@ -70,7 +70,7 @@
             app:hintTextColor="@color/white" app:layout_constraintHorizontal_bias="1.0">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/textInputEditTextPasswordRepeatReg"
+                android:id="@+id/textInputEditTextPasswordReg"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
                 android:layout_width="match_parent"
