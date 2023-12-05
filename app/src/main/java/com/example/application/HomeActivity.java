@@ -4,6 +4,8 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.view.MenuItem;
@@ -18,6 +20,8 @@ import com.yandex.mapkit.MapKit;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
 import com.yandex.mapkit.map.CameraPosition;
+import com.yandex.mapkit.map.IconStyle;
+import com.yandex.mapkit.map.RotationType;
 import com.yandex.mapkit.map.TextStyle;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.user_location.UserLocationLayer;
@@ -26,12 +30,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Properties;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
     public String MAPKIT_API_KEY;
     private MapView mapView;
     private Uri imageUri;
+    private String text;
     BottomNavigationView bottomNavigationView;
 
     @Override
@@ -52,7 +58,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         MapKitFactory.initialize(this);
         init();
 
-        CameraPosition position = new CameraPosition(new Point(57.21, 41.90),
+        CameraPosition position = new CameraPosition(new Point(57.00133883199114, 40.94248032495209),
                 14, 0, 0);
         mapView.getMap().setNightModeEnabled(true);
         mapView.getMap().setRotateGesturesEnabled(false);
@@ -70,17 +76,34 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Bitmap finalBitmap = bitmap;
+            Bitmap finalBitmap = Bitmap.createScaledBitmap(bitmap, 500, 500, true);
             assert finalBitmap != null;
-            bitmap.setHasMipMap(true);
             mapView.getMap().getMapObjects().addPlacemark(object -> {
                 object.setGeometry(position.getTarget());
-                object.setIcon(ImageProvider.fromBitmap(finalBitmap));
-                object.setText("Тест", new TextStyle().setPlacement(TextStyle.Placement.BOTTOM));
+                object.setIcon(ImageProvider.fromBitmap(finalBitmap), getIconStyle());
+                object.setText(text, getText());
             });
         }
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
+    }
+
+    public IconStyle getIconStyle() {
+        IconStyle style = new IconStyle();
+        style.setRotationType(RotationType.NO_ROTATION);
+        style.setScale(0.5f);
+        style.setFlat(true);
+        style.setZIndex(1f);
+        return style;
+    }
+
+    public TextStyle getText() {
+        TextStyle textStyle = new TextStyle();
+        textStyle.setPlacement(TextStyle.Placement.BOTTOM);
+        textStyle.setColor(Color.RED);
+        textStyle.setOffset(5);
+        textStyle.setSize(8);
+        return textStyle;
     }
 
     private void init() {
@@ -153,8 +176,10 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
 
     private boolean hasUri() {
         String uri = getIntent().getStringExtra("imageUri");
-        if (uri != null) {
+        String text = getIntent().getStringExtra("text");
+        if (uri != null && text != null) {
             this.imageUri = Uri.parse(uri);
+            this.text = text;
             return true;
         } else
             return false;
