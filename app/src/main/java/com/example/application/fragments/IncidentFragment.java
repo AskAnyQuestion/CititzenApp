@@ -1,4 +1,4 @@
-package com.example.application;
+package com.example.application.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.example.application.activity.HomeActivity;
+import com.example.application.R;
 import com.google.android.material.textfield.TextInputEditText;
 
 import static android.app.Activity.RESULT_OK;

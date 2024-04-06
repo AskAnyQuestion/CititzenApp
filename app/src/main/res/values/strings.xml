@@ -1,5 +1,10 @@
 <resources>
-    <string name="app_name">Application</string>
+    <string name="app_name">Гражданин</string>
+    <string name="mainTitle">Главная</string>
+    <string name="profileTitle">Профиль</string>
+    <string name="newsTitle">Новости</string>
+    <string name="alarmTitle">Срочно</string>
+    <string name="addTitle">Добавить</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--  <string name="hello_blank_fragment">Hello blank fragment</string> -->
 </resources>

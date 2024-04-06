@@ -1,9 +1,11 @@
-package com.example.application;
+package com.example.application.activity;
 
 import android.animation.*;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -11,6 +13,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.example.application.R;
+import com.example.application.Utils;
+import com.example.application.exception.VALIDATE_FIELD;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -21,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button button;
     private TextInputLayout textInputLayoutPassword;
     private TextInputLayout textInputLayoutTelephone;
-    private TextView textViewRegistr;
+    private TextView textViewRegister;
     private TextInputEditText textInputEditTextTelephoneLogin, textInputEditTextPasswordLogin;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -42,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
             @SuppressLint("Recycle") AnimatorSet animatorSet = new AnimatorSet();
             animatorSet.playTogether(moveAnimator, scaleAnimator);
             animatorSet.setDuration(300);
-            Handler handler = new Handler();
+            Handler handler = new Handler(Looper.getMainLooper());
             AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
             alphaAnimation.setDuration(500);
             alphaAnimation.setFillAfter(true);
@@ -55,31 +60,42 @@ public class LoginActivity extends AppCompatActivity {
             AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
             alphaAnimation.setDuration(500);
             alphaAnimation.setFillAfter(true);
-            Handler handler = new Handler();
+            Handler handler = new Handler(Looper.getMainLooper());
             handler.postDelayed(() -> startAnimation(alphaAnimation), 500);
         }
         button.setOnClickListener(v -> openHomeActivity());
-        textViewRegistr.setOnClickListener(v -> openRegistrActivity());
+        textViewRegister.setOnClickListener(v -> openRegisterActivity());
     }
 
     public void openHomeActivity() {
-        Long phone = Long.parseLong("8".concat(textInputEditTextTelephoneLogin.getEditableText().toString()));
-        String password = textInputEditTextPasswordLogin.getEditableText().toString();
-        if (password.equals("")) {
-            Toast.makeText(LoginActivity.this, "Пожалуйста, заполните все поля", Toast.LENGTH_LONG).show();
-        } else {
-            DbHelper dbHelper = new DbHelper(this);
-            if (dbHelper.checkUser(phone, password)) {
+        Editable editPhone = textInputEditTextTelephoneLogin.getEditableText();
+        Editable editPassword = textInputEditTextPasswordLogin.getEditableText();
+
+        if (editPhone.length() == 0 || editPassword.length() == 0)
+            Toast.makeText(LoginActivity.this, VALIDATE_FIELD.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
+        else if (editPhone.length() > 10 ||
+                editPassword.length() > 32)
+            Toast.makeText(LoginActivity.this, VALIDATE_FIELD.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
+        else if (editPhone.length() != 10)
+            Toast.makeText(LoginActivity.this, VALIDATE_FIELD.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
+        else {
+            String str = editPhone.toString();
+            if (Utils.isNumber(str)) {
+                Long phone = Long.parseLong(str);
+                String password = textInputEditTextPasswordLogin.getEditableText().toString();
                 Intent intent = new Intent(this, HomeActivity.class);
                 startActivity(intent);
-            } else
-                Toast.makeText(LoginActivity.this, "Ошибка входа", Toast.LENGTH_LONG).show();
+                finish();
+            }
+            else
+                Toast.makeText(LoginActivity.this, VALIDATE_FIELD.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
-    public void openRegistrActivity() {
-        Intent intent = new Intent(this, RegistrActivity.class);
+    public void openRegisterActivity() {
+        Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void startAnimation(AlphaAnimation alphaAnimation) {
@@ -88,7 +104,7 @@ public class LoginActivity extends AppCompatActivity {
         textViewEnter.startAnimation(alphaAnimation);
         textInputLayoutPassword.startAnimation(alphaAnimation);
         textInputLayoutTelephone.startAnimation(alphaAnimation);
-        textViewRegistr.startAnimation(alphaAnimation);
+        textViewRegister.startAnimation(alphaAnimation);
     }
 
     private void initViews() {
@@ -98,7 +114,7 @@ public class LoginActivity extends AppCompatActivity {
         button = findViewById(R.id.buttonLogin);
         textInputLayoutPassword = findViewById(R.id.textInputLayoutPasswordLogin);
         textInputLayoutTelephone = findViewById(R.id.textInputLayoutTelephoneLogin);
-        textViewRegistr = findViewById(R.id.textViewRegistrLogin);
+        textViewRegister = findViewById(R.id.textViewRegistrLogin);
         textInputEditTextTelephoneLogin = findViewById(R.id.textInputEditTextTelephoneLogin);
         textInputEditTextPasswordLogin = findViewById(R.id.textInputEditTextPasswordLogin);
     }
@@ -107,7 +123,6 @@ public class LoginActivity extends AppCompatActivity {
         Bundle argument = getIntent().getExtras();
         if (argument != null)
             return argument.getBoolean("isFirstRun");
-        else
-            return false;
+        return false;
     }
 }

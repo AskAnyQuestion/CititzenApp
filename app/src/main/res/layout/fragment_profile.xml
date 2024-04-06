@@ -5,7 +5,7 @@
                                                    xmlns:tools="http://schemas.android.com/tools"
                                                    android:layout_width="match_parent"
                                                    android:layout_height="match_parent"
-                                                   tools:context=".ProfileFragment"
+                                                   tools:context=".fragments.ProfileFragment"
                                                    android:background="#262526"
                                                    app:layout_constraintStart_toStartOf="parent"
                                                    app:layout_constraintEnd_toEndOf="parent"
@@ -14,7 +14,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="413dp"
                                                        android:layout_height="746dp"
-                                                       tools:context=".ProfileFragment"
+                                                       tools:context=".fragments.ProfileFragment"
                                                        android:background="@color/black"
                                                        tools:ignore="MissingConstraints"
                                                        app:layout_constraintStart_toStartOf="parent"

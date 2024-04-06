@@ -1,26 +1,29 @@
-package com.example.application;
+package com.example.application.activity;
 
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.example.application.R;
+import com.example.application.Utils;
+import com.example.application.exception.VALIDATE_FIELD;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.util.Objects;
-
-public class RegistrActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
     private TextInputLayout textInputLayoutPasswordReg, textInputLayoutRepeatPasswordReg,
             textInputLayoutTelephoneReg, textInputLayoutLoginReg;
     private Button buttonReg;
     private TextView textViewReg, textViewVillageReg;
-    private TextInputEditText textInputEditTextLoginReg, textInputEditTextPasswordReg,
-            textInputEditTextPasswordRepeatReg, textInputEditTextTelephoneReg;
+    private TextInputEditText textInputEditTextLoginReg;
+    private TextInputEditText textInputEditTextPasswordReg;
+    private TextInputEditText textInputEditTextPasswordRepeatReg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +33,7 @@ public class RegistrActivity extends AppCompatActivity {
         AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
         alphaAnimation.setDuration(500);
         alphaAnimation.setFillAfter(true);
-        Handler handler = new Handler();
+        Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(() -> startAnimation(alphaAnimation), 500);
         buttonReg.setOnClickListener(v -> openHomeActivity());
         textViewReg.setOnClickListener(v -> returnToLogin());
@@ -40,33 +43,37 @@ public class RegistrActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.putExtra("isFirstRun", true);
         startActivity(intent);
+        finish();
     }
 
     public void openHomeActivity() {
-        Long phone = Long.parseLong("8".concat(textInputEditTextTelephoneReg.getEditableText().toString()));
-        String login = textInputEditTextLoginReg.getEditableText().toString();
-        String password = textInputEditTextPasswordReg.getEditableText().toString();
-        String repeatPassword = textInputEditTextPasswordRepeatReg.getEditableText().toString();
-        if (login.equals("") || password.equals("") || repeatPassword.equals("")) {
-            Toast.makeText(RegistrActivity.this, "Пожалуйста, заполните все поля", Toast.LENGTH_LONG).show();
-        } else {
-            if (password.equals(repeatPassword)) {
-                DbHelper dbHelper = new DbHelper(this);
-                if (dbHelper.checkLogin(login)) {
-                    Toast.makeText(RegistrActivity.this, "Пользователь уже существует", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                boolean registeredSuccess = dbHelper.insertData(phone, login, password);
-                if (registeredSuccess) {
-                    Toast.makeText(RegistrActivity.this, "Пользователь зарегистрирован", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(this, HomeActivity.class);
-                    startActivity(intent);
-                }
-                else
-                    Toast.makeText(RegistrActivity.this, "Пользователь не зарегистрирован", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(RegistrActivity.this, "Пароли не совпадают", Toast.LENGTH_LONG).show();
+        Editable phoneEdit = textInputEditTextLoginReg.getEditableText();
+        Editable loginEdit  = textInputEditTextLoginReg.getEditableText();
+        Editable passwordEdit  = textInputEditTextPasswordReg.getEditableText();
+        Editable repeatPasswordEdit  = textInputEditTextPasswordRepeatReg.getEditableText();
+
+        if (phoneEdit.length() == 0 || loginEdit.length() == 0 ||
+                passwordEdit.length() == 0 || repeatPasswordEdit.length() == 0)
+            Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
+        else if (phoneEdit.length() > 10 ||
+                 loginEdit.length() > 16 ||
+                 passwordEdit.length() > 32 ||
+                 repeatPasswordEdit.length() > 32
+        )
+            Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
+        else if (!passwordEdit.toString().equals(repeatPasswordEdit.toString()))
+            Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.PASSWORD_MISMATCH.toString(), Toast.LENGTH_LONG).show();
+        else {
+            String str = phoneEdit.toString();
+            if (Utils.isNumber(str)) {
+                Long phone = Long.parseLong(str);
+                String password = textInputEditTextPasswordReg.getEditableText().toString();
+                Intent intent = new Intent(this, HomeActivity.class);
+                startActivity(intent);
+                finish();
             }
+            else
+                Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -89,7 +96,7 @@ public class RegistrActivity extends AppCompatActivity {
         buttonReg = findViewById(R.id.buttonReg);
         textViewReg = findViewById(R.id.textViewReg);
         textInputEditTextLoginReg = findViewById(R.id.textInputEditTextLoginReg);
-        textInputEditTextTelephoneReg = findViewById(R.id.textInputEditTextTelephoneReg);
+        TextInputEditText textInputEditTextTelephoneReg = findViewById(R.id.textInputEditTextTelephoneReg);
         textInputEditTextPasswordReg = findViewById(R.id.textInputEditTextPasswordReg);
         textInputEditTextPasswordRepeatReg = findViewById(R.id.textInputEditTextPasswordRepeatReg);
     }
