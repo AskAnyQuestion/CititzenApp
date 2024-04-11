@@ -2,31 +2,37 @@ package com.example.application.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.*;
 import android.net.Uri;
+import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.example.application.R;
 import com.example.application.fragments.*;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationToken;
+import com.google.android.gms.tasks.CancellationTokenSource;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.yandex.mapkit.Animation;
-import com.yandex.mapkit.MapKit;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
-import com.yandex.mapkit.map.CameraPosition;
-import com.yandex.mapkit.map.IconStyle;
-import com.yandex.mapkit.map.RotationType;
-import com.yandex.mapkit.map.TextStyle;
+import com.yandex.mapkit.map.*;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.user_location.UserLocationLayer;
 import com.yandex.runtime.image.ImageProvider;
@@ -36,13 +42,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
+public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener, LocationListener {
     public String MAPKIT_API_KEY;
     private MapView mapView;
     private Uri imageUri;
     private String text;
     private FloatingActionButton buttonCrossAdd;
-    BottomNavigationView bottomNavigationView;
+    private BottomNavigationView bottomNavigationView;
+    private LocationManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,31 +61,52 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (!hasUri()) {
+        if (!hasUri())
             MapKitFactory.setApiKey(MAPKIT_API_KEY);
-        }
+
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
         MapKitFactory.initialize(this);
         init();
         buttonCrossAdd.setOnClickListener(v -> { // cross
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.frame_layout, new IncidentFragment())
-                    .commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new IncidentFragment()).commit();
         });
 
-        CameraPosition position = new CameraPosition(new Point(57.00133883199114, 40.94248032495209),
-                14, 0, 0);
-        mapView.getMapWindow().getMap().setNightModeEnabled(true);
-        mapView.getMapWindow().getMap().setRotateGesturesEnabled(false);
-        mapView.getMapWindow().getMap().move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
-        if (requestLocationPermission()) {
-            MapKit mapKit = MapKitFactory.getInstance();
-            UserLocationLayer locationLayer = mapKit.createUserLocationLayer(mapView.getMapWindow());
-            locationLayer.setVisible(true);
-            locationLayer.setHeadingEnabled(true);
+        if (isLocationPermissionGranted()) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                return;
+
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        if (location != null) {
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+                            updateLocation(new Point(latitude, longitude));
+                        }
+                    });
         }
+    }
+
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        updateLocation(new Point(latitude, longitude));
+    }
+
+    private void updateLocation (Point point) {
+        CameraPosition position = new CameraPosition(point, 17, 0, 0);
+        Map map = mapView.getMapWindow().getMap();
+        map.setNightModeEnabled(true);
+        map.setRotateGesturesEnabled(false);
+        map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
+
+        UserLocationLayer locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
+        locationLayer.setVisible(true);
+        locationLayer.setHeadingEnabled(true);
         if (hasUri()) {
             Bitmap bitmap = null;
             try {
@@ -98,6 +126,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
     }
+
 
     public IconStyle getIconStyle() {
         IconStyle style = new IconStyle();
@@ -125,12 +154,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         mapView = findViewById(R.id.mapview);
     }
 
-    private boolean requestLocationPermission() {
-        return (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                && (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                && (ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED)
-                && (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED);
+    public boolean isLocationPermissionGranted() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 122);
+            return false;
+        } else
+            return true;
     }
+
 
     @Override
     protected void onStop() {
@@ -151,38 +185,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.home -> {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.frame_layout, new HomeFragment())
-                        .commit();
-                 return true;
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new HomeFragment()).commit();
+                return true;
             }
             case R.id.profile -> {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.frame_layout, new ProfileFragment())
-                        .commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new ProfileFragment()).commit();
                 return true;
             }
-            /*case R.id.add, R.id.addCross -> {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.frame_layout, new IncidentFragment())
-                        .commit();
-                return true;
-            }*/
             case R.id.news -> {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.frame_layout, new NewsFragment())
-                        .commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new NewsFragment()).commit();
                 return true;
             }
             case R.id.alarm -> {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.frame_layout, new AlarmFragment())
-                        .commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new AlarmFragment()).commit();
                 return true;
             }
         }
