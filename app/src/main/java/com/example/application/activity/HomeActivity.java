@@ -2,16 +2,13 @@ package com.example.application.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.*;
 import android.net.Uri;
-import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,9 +19,6 @@ import com.example.application.R;
 import com.example.application.fragments.*;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.Priority;
-import com.google.android.gms.tasks.CancellationToken;
-import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -42,75 +36,84 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener, LocationListener {
+public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
     public String MAPKIT_API_KEY;
-    private MapView mapView;
-    private Uri imageUri;
     private String text;
+    private MapView mapView;
+    private Uri uri;
     private FloatingActionButton buttonCrossAdd;
+    private FloatingActionButton buttonFindMe;
     private BottomNavigationView bottomNavigationView;
-    private LocationManager manager;
+    private CameraPosition position;
+    private UserLocationLayer locationLayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Properties properties = new Properties();
-        try {
-            InputStream inputStream = getAssets().open("config.properties");
-            properties.load(inputStream);
-            this.MAPKIT_API_KEY = properties.getProperty("API_TOKEN");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.MAPKIT_API_KEY = getApiToken();
         if (!hasUri())
             MapKitFactory.setApiKey(MAPKIT_API_KEY);
-
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
         MapKitFactory.initialize(this);
         init();
+
         buttonCrossAdd.setOnClickListener(v -> { // cross
             getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new IncidentFragment()).commit();
         });
+        buttonFindMe.setOnClickListener(v -> { // find
+            updateLocation(position.getTarget());
+        });
 
         if (isLocationPermissionGranted()) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-                return;
-
             FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, location -> {
-                        if (location != null) {
-                            double latitude = location.getLatitude();
-                            double longitude = location.getLongitude();
-                            updateLocation(new Point(latitude, longitude));
-                        }
-                    });
+            getLocation(fusedLocationClient);
         }
     }
 
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
-        updateLocation(new Point(latitude, longitude));
+    private String getApiToken() {
+        Properties properties = new Properties();
+        try {
+            InputStream inputStream = getAssets().open("config.properties");
+            properties.load(inputStream);
+            return MAPKIT_API_KEY = properties.getProperty("API_TOKEN");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    private void updateLocation (Point point) {
-        CameraPosition position = new CameraPosition(point, 17, 0, 0);
+    private void getLocation(FusedLocationProviderClient fusedLocationClient) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            return;
+        Task<Location> task = fusedLocationClient.getLastLocation();
+        task.addOnSuccessListener(this, location -> {
+            if (location != null) {
+                buttonFindMe.show();
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                updateLocation(new Point(latitude, longitude));
+            } else
+                buttonFindMe.hide();
+        });
+    }
+
+    private void updateLocation(Point point) {
+        this.position = new CameraPosition(point, 17, 0, 0);
         Map map = mapView.getMapWindow().getMap();
         map.setNightModeEnabled(true);
         map.setRotateGesturesEnabled(false);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
 
-        UserLocationLayer locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
-        locationLayer.setVisible(true);
-        locationLayer.setHeadingEnabled(true);
+        if (locationLayer == null) {
+            locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
+            locationLayer.setVisible(true);
+            locationLayer.setHeadingEnabled(true);
+        }
         if (hasUri()) {
             Bitmap bitmap = null;
             try {
-                InputStream inputStream = getContentResolver().openInputStream(imageUri);
+                InputStream inputStream = getContentResolver().openInputStream(uri);
                 bitmap = BitmapFactory.decodeStream(inputStream);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -149,6 +152,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private void init() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         buttonCrossAdd = findViewById(R.id.addCross);
+        buttonFindMe = findViewById(R.id.findme);
         bottomNavigationView.setBackground(null);
         bottomNavigationView.getMenu().getItem(2).setEnabled(false); // Неактивная зона
         mapView = findViewById(R.id.mapview);
@@ -161,8 +165,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                     this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 122);
             return false;
-        } else
-            return true;
+        }
+        return true;
     }
 
 
@@ -208,7 +212,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         String uri = getIntent().getStringExtra("imageUri");
         String text = getIntent().getStringExtra("text");
         if (uri != null && text != null) {
-            this.imageUri = Uri.parse(uri);
+            this.uri = Uri.parse(uri);
             this.text = text;
             return true;
         } else
