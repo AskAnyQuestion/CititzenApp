@@ -16,10 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.activity.HomeActivity;
 import com.example.application.R;
+import com.example.application.exception.VALIDATE_FIELD;
 import com.google.android.material.textfield.TextInputEditText;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static com.example.application.exception.VALIDATE_FIELD.*;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -81,29 +83,19 @@ public class IncidentFragment extends Fragment {
         this.inflatedView =  inflater.inflate(R.layout.fragment_incident, container, false);
         init();
         redButton.setOnClickListener(v -> {
-            NotificationCompat.Builder builder =
-                    new NotificationCompat.Builder(inflater.getContext())
-                            .setSmallIcon(R.drawable.bell)
-                            .setContentTitle("Title")
-                            .setContentText("Notification text");
-            Notification notification = builder.build();
-            NotificationManager notificationManager =
-                    (NotificationManager) inflatedView.getContext().getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(1, notification);
-
             if (materialButton.getVisibility() != 0) {
-                if (!editTextTextPersonName.getEditableText().toString().equals("")) {
+                if (!editTextTextPersonName.getEditableText().toString().isEmpty()) {
                     if (checkBox.isChecked()) {
                         Intent intent = new Intent(this.getContext(), HomeActivity.class);
                         intent.putExtra("imageUri", uri.toString());
                         intent.putExtra("text", editTextTextPersonName.getEditableText().toString());
                         startActivity(intent);
                     } else
-                        Toast.makeText(this.getContext(), "Подтвердите согласие на обработку данных", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this.getContext(), SEND_DATA.toString(), Toast.LENGTH_LONG).show();
                 } else
-                    Toast.makeText(this.getContext(), "Заполните поля", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this.getContext(), FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
             } else
-                Toast.makeText(this.getContext(), "Материал не загружен", Toast.LENGTH_LONG).show();
+                Toast.makeText(this.getContext(), MATERIAL_NOT_FOUND.toString(), Toast.LENGTH_LONG).show();
         });
         materialButton.setOnClickListener(v -> {
             Intent gallery = new Intent(Intent.ACTION_PICK);

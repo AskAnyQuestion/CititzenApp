@@ -3,9 +3,8 @@ package com.example.application.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
+import android.graphics.*;
+import android.graphics.Rect;
 import android.location.*;
 import android.net.Uri;
 import android.view.MenuItem;
@@ -46,7 +45,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private BottomNavigationView bottomNavigationView;
     private CameraPosition position;
     private UserLocationLayer locationLayer;
-
+    private MapObjectCollection objCollection;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         this.MAPKIT_API_KEY = getApiToken();
@@ -104,6 +103,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         map.setNightModeEnabled(true);
         map.setRotateGesturesEnabled(false);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
+        this.objCollection = map.getMapObjects();
 
         if (locationLayer == null) {
             locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
@@ -118,16 +118,32 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Bitmap finalBitmap = Bitmap.createScaledBitmap(bitmap, 500, 500, true);
-            assert finalBitmap != null;
-            mapView.getMapWindow().getMap().getMapObjects().addPlacemark(object -> {
+
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, true);
+            Bitmap cloneBitmap = getRoundedCornerBitmap(scaledBitmap);
+
+            this.objCollection.addPlacemark(object -> {
                 object.setGeometry(position.getTarget());
-                object.setIcon(ImageProvider.fromBitmap(finalBitmap), getIconStyle());
-                object.setText(text, getText());
+                object.setIcon(ImageProvider.fromBitmap(cloneBitmap), getIconStyle());
             });
         }
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
+    }
+
+    private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
+                .getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        Paint paint = new Paint();
+        Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        RectF rectF = new RectF(rect);
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        canvas.drawRoundRect(rectF, 100, 100, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
     }
 
 
@@ -135,8 +151,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         IconStyle style = new IconStyle();
         style.setRotationType(RotationType.NO_ROTATION);
         style.setScale(0.5f);
-        style.setFlat(true);
-        style.setZIndex(1f);
+        style.setZIndex(0f);
         return style;
     }
 
