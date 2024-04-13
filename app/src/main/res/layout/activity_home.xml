@@ -28,11 +28,39 @@
                         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
                         android:id="@+id/frame_layout_r"
                         android:background="@drawable/rounded">
+                    <TextView
+                            android:layout_marginTop="50dp"
+                            android:layout_marginLeft="50dp"
+                            android:textColor="@color/grey"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/lastUpdate"
+                            tools:ignore="HardcodedText,RtlHardcoded"
+                    />
+                    <TextView
+                            android:layout_marginTop="75dp"
+                            android:layout_marginLeft="50dp"
+                            android:textColor="@color/white"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/description"
+                            tools:ignore="HardcodedText,RtlHardcoded"
+                    />
+                    <TextView
+                            android:layout_marginTop="100dp"
+                            android:layout_marginLeft="50dp"
+                            android:textColor="@color/grey"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/streetAndKm"
+                            tools:ignore="HardcodedText,RtlHardcoded"
+                    />
                     <ImageView android:layout_width="70dp"
                                android:layout_height="wrap_content"
                                android:layout_gravity="center|top"
                                android:src="@drawable/baseline_remove_24"
-                               android:contentDescription="@string/showDescription">
+                               android:contentDescription="@string/showDescription"
+                    >
                     </ImageView>
                 </FrameLayout>
             </androidx.coordinatorlayout.widget.CoordinatorLayout>

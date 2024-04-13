@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,7 +18,8 @@ import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.example.application.R;
-import com.example.application.data.IncidentData;
+import com.example.application.Utils;
+import com.example.application.map.IncidentData;
 import com.example.application.fragments.*;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -45,6 +47,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private MapView mapView;
     private Uri uri;
     private FrameLayout layout;
+    private TextView lastUpdate;
+    private TextView description;
+    private TextView streetAndKm;
     private FloatingActionButton buttonCrossAdd;
     private FloatingActionButton buttonFindMe;
     private BottomNavigationView bottomNavigationView;
@@ -148,11 +153,23 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void watchIncident() {
         this.objCollection.addTapListener((mapObject, p) -> {
             IncidentData data = (IncidentData) mapObject.getUserData();
-            BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            if (data != null) {
+                String lastUpdate = "Последнее обновление: ";
+                Point incidentPoint = data.getPoint();
+                double kilometers = Utils.calculateDistanceBetweenPoints(position.getTarget(), incidentPoint);
+                this.lastUpdate.setText(lastUpdate + data.getTime());
+                this.description.setText(data.getDescription());
+                this.streetAndKm.setText(data.getAddress() + " - " + kilometers + " км.");
+                BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                // yandex.maps.runtime
+                // com.example.application
+                // Java object is already finalized. Nothing to do.
+            }
             return false;
         });
     }
@@ -194,6 +211,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         buttonCrossAdd = findViewById(R.id.addCross);
         buttonFindMe = findViewById(R.id.findme);
+        lastUpdate = findViewById(R.id.lastUpdate);
+        description = findViewById(R.id.description);
+        streetAndKm = findViewById(R.id.streetAndKm);
         layout = findViewById(R.id.frame_layout_r);
         bottomNavigationView.setBackground(null);
         bottomNavigationView.getMenu().getItem(2).setEnabled(false); // Неактивная зона
