@@ -8,6 +8,8 @@ import android.graphics.Rect;
 import android.location.*;
 import android.net.Uri;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,11 +17,13 @@ import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.example.application.R;
+import com.example.application.data.IncidentData;
 import com.example.application.fragments.*;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.yandex.mapkit.Animation;
@@ -36,10 +40,11 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
-    public String MAPKIT_API_KEY;
+    private String MAPKIT_API_KEY;
     private String text;
     private MapView mapView;
     private Uri uri;
+    private FrameLayout layout;
     private FloatingActionButton buttonCrossAdd;
     private FloatingActionButton buttonFindMe;
     private BottomNavigationView bottomNavigationView;
@@ -118,17 +123,38 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, true);
             Bitmap cloneBitmap = getRoundedCornerBitmap(scaledBitmap);
-
-            this.objCollection.addPlacemark(object -> {
-                object.setGeometry(position.getTarget());
-                object.setIcon(ImageProvider.fromBitmap(cloneBitmap), getIconStyle());
-            });
+            /* Добавление инцидента */
+            addIncident(cloneBitmap);
+            /* Просмотр инцидента */
+            watchIncident();
         }
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
+    }
+
+    private void addIncident(Bitmap cloneBitmap) {
+        this.objCollection.addPlacemark(object -> {
+            Point p = position.getTarget();
+            object.setUserData(new IncidentData(p, text, this));
+            object.setGeometry(p);
+            object.setIcon(ImageProvider.fromBitmap(cloneBitmap), getIconStyle());
+            //
+            BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
+            bottomSheetBehavior.setPeekHeight(0, true);
+            layout.setVisibility(View.VISIBLE);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        });
+    }
+
+    private void watchIncident() {
+        this.objCollection.addTapListener((mapObject, p) -> {
+            IncidentData data = (IncidentData) mapObject.getUserData();
+            BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            return false;
+        });
     }
 
     private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
@@ -147,7 +173,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
 
-    public IconStyle getIconStyle() {
+    private IconStyle getIconStyle() {
         IconStyle style = new IconStyle();
         style.setRotationType(RotationType.NO_ROTATION);
         style.setScale(0.5f);
@@ -155,7 +181,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return style;
     }
 
-    public TextStyle getText() {
+    private TextStyle getText() {
         TextStyle textStyle = new TextStyle();
         textStyle.setPlacement(TextStyle.Placement.BOTTOM);
         textStyle.setColor(Color.RED);
@@ -168,12 +194,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         buttonCrossAdd = findViewById(R.id.addCross);
         buttonFindMe = findViewById(R.id.findme);
+        layout = findViewById(R.id.frame_layout_r);
         bottomNavigationView.setBackground(null);
         bottomNavigationView.getMenu().getItem(2).setEnabled(false); // Неактивная зона
         mapView = findViewById(R.id.mapview);
     }
 
-    public boolean isLocationPermissionGranted() {
+    private boolean isLocationPermissionGranted() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
