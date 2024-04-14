@@ -69,13 +69,27 @@
                     android:layout_alignParentStart="false"
                     android:layout_alignParentEnd="true"
                     android:layout_marginTop="450dp"
-                    android:alpha="0.4"
+                    android:alpha="0.6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/white"
                     android:src="@drawable/findme"
                     android:id="@+id/findme"
                     android:contentDescription="@string/findMyLocation"
+                    app:maxImageSize="40dp"
+                    android:layout_marginEnd="10dp"/>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:text=""
+                    android:layout_alignParentStart="false"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="370dp"
+                    android:alpha="0.6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/white"
+                    android:src="@drawable/sun"
+                    android:id="@+id/changeTIme"
+                    android:contentDescription="@string/changeTime"
                     app:maxImageSize="40dp"
                     android:layout_marginEnd="10dp"/>
         </com.yandex.mapkit.mapview.MapView>

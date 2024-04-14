@@ -19,7 +19,7 @@ public class IncidentData {
 
     public IncidentData(Point point, String description, Activity activity) {
         this.time = LocalTime.now();
-        this.description = description;
+        this.description = description.substring(0, 1).toUpperCase() + description.substring(1);
         this.point = point;
         Geocoder geocoder = new Geocoder(activity.getApplicationContext(), new Locale("RU"));
         try {

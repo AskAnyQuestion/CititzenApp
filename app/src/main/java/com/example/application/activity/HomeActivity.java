@@ -2,6 +2,9 @@ package com.example.application.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.*;
 import android.graphics.Rect;
@@ -39,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
@@ -52,25 +56,40 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private TextView streetAndKm;
     private FloatingActionButton buttonCrossAdd;
     private FloatingActionButton buttonFindMe;
+    private FloatingActionButton buttonChangeTime;
     private BottomNavigationView bottomNavigationView;
     private CameraPosition position;
     private UserLocationLayer locationLayer;
     private MapObjectCollection objCollection;
+    private boolean isNightMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         this.MAPKIT_API_KEY = getApiToken();
-        if (!hasUri())
+        if (isFirstStart())
             MapKitFactory.setApiKey(MAPKIT_API_KEY);
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
         MapKitFactory.initialize(this);
         init();
+        initPreference();
 
         buttonCrossAdd.setOnClickListener(v -> { // cross
             getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new IncidentFragment()).commit();
         });
         buttonFindMe.setOnClickListener(v -> { // find
             updateLocation(position.getTarget());
+        });
+        buttonChangeTime.setOnClickListener(v -> { // night-mode
+            Map map = this.mapView.getMapWindow().getMap();
+            this.isNightMode = !isNightMode;
+            map.setNightModeEnabled(this.isNightMode);
+            // Preference
+            SharedPreferences sharedPreferences = getApplicationContext()
+                    .getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("nightMode", isNightMode);
+            editor.apply();
         });
 
         if (isLocationPermissionGranted()) {
@@ -110,8 +129,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private void updateLocation(Point point) {
         this.position = new CameraPosition(point, 17, 0, 0);
         Map map = mapView.getMapWindow().getMap();
-        map.setNightModeEnabled(true);
         map.setRotateGesturesEnabled(false);
+        map.setNightModeEnabled(isNightMode);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
         this.objCollection = map.getMapObjects();
 
@@ -120,7 +139,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             locationLayer.setVisible(true);
             locationLayer.setHeadingEnabled(true);
         }
-        if (hasUri()) {
+        if (!isFirstStart()) {
             Bitmap bitmap = null;
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);
@@ -145,7 +164,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             object.setUserData(new IncidentData(p, text, this));
             object.setGeometry(p);
             object.setIcon(ImageProvider.fromBitmap(cloneBitmap), getIconStyle());
-            //
             BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
             bottomSheetBehavior.setPeekHeight(0, true);
             layout.setVisibility(View.VISIBLE);
@@ -155,23 +173,24 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     @SuppressLint("SetTextI18n")
     private void watchIncident() {
-        this.objCollection.addTapListener((mapObject, p) -> {
+        MapObjectTapListener listener = (mapObject, point) -> {
             IncidentData data = (IncidentData) mapObject.getUserData();
             if (data != null) {
-                String lastUpdate = "Последнее обновление: ";
+                String lastUpdateMessage = "Последнее обновление: ";
                 Point incidentPoint = data.getPoint();
                 double kilometers = Utils.calculateDistanceBetweenPoints(position.getTarget(), incidentPoint);
-                this.lastUpdate.setText(lastUpdate + data.getTime());
-                this.description.setText(data.getDescription());
-                this.streetAndKm.setText(data.getAddress() + " - " + kilometers + " км.");
+                lastUpdate.setText(lastUpdateMessage + data.getTime());
+                description.setText(data.getDescription());
+                streetAndKm.setText(data.getAddress() + " - " + kilometers + " км.");
                 BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                // yandex.maps.runtime
-                // com.example.application
-                // Java object is already finalized. Nothing to do.
             }
-            return false;
-        });
+            return true;
+        };
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
+        ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
+        listeners.add(listener);
+        this.objCollection.addTapListener(listener);
     }
 
     private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
@@ -211,13 +230,20 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         buttonCrossAdd = findViewById(R.id.addCross);
         buttonFindMe = findViewById(R.id.findme);
+        buttonChangeTime = findViewById(R.id.changeTIme);
         lastUpdate = findViewById(R.id.lastUpdate);
         description = findViewById(R.id.description);
         streetAndKm = findViewById(R.id.streetAndKm);
         layout = findViewById(R.id.frame_layout_r);
         bottomNavigationView.setBackground(null);
-        bottomNavigationView.getMenu().getItem(2).setEnabled(false); // Неактивная зона
+        bottomNavigationView.getMenu().getItem(2).setEnabled(false);
         mapView = findViewById(R.id.mapview);
+    }
+
+    private void initPreference() {
+        SharedPreferences preferences = getApplicationContext().
+                getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
+        this.isNightMode = preferences.getBoolean("nightMode", false);
     }
 
     private boolean isLocationPermissionGranted() {
@@ -270,14 +296,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return false;
     }
 
-    private boolean hasUri() {
-        String uri = getIntent().getStringExtra("imageUri");
-        String text = getIntent().getStringExtra("text");
+    private boolean isFirstStart() {
+        Intent intent = getIntent();
+        String uri = intent.getStringExtra("imageUri");
+        String text = intent.getStringExtra("text");
         if (uri != null && text != null) {
             this.uri = Uri.parse(uri);
             this.text = text;
-            return true;
-        } else
             return false;
+        } else
+            return true;
     }
 }
