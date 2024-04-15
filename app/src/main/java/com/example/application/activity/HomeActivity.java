@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,10 +47,13 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
+    private final ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
     private String MAPKIT_API_KEY;
     private String text;
-    private MapView mapView;
     private Uri uri;
+    private MapView mapView;
+    private ImageView imageIncident;
     private FrameLayout layout;
     private TextView lastUpdate;
     private TextView description;
@@ -148,20 +152,21 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 e.printStackTrace();
             }
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, true);
-            Bitmap cloneBitmap = getRoundedCornerBitmap(scaledBitmap);
+            Bitmap cloneBitmap = getIconBitmap(scaledBitmap);
+            Bitmap bit = getRoundedCornerBitmap(cloneBitmap);
+
             /* Добавление инцидента */
-            addIncident(cloneBitmap);
+            addIncident(bit);
             /* Просмотр инцидента */
             watchIncident();
         }
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
     }
-
     private void addIncident(Bitmap cloneBitmap) {
         this.objCollection.addPlacemark(object -> {
             Point p = position.getTarget();
-            object.setUserData(new IncidentData(p, text, this));
+            object.setUserData(new IncidentData(p, cloneBitmap, text, this));
             object.setGeometry(p);
             object.setIcon(ImageProvider.fromBitmap(cloneBitmap), getIconStyle());
             BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
@@ -182,17 +187,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 lastUpdate.setText(lastUpdateMessage + data.getTime());
                 description.setText(data.getDescription());
                 streetAndKm.setText(data.getAddress() + " - " + kilometers + " км.");
+                imageIncident.setImageBitmap(data.getImage());
                 BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
             return true;
         };
-        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
-        ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
         listeners.add(listener);
         this.objCollection.addTapListener(listener);
     }
-
     private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
                 .getHeight(), Bitmap.Config.ARGB_8888);
@@ -202,17 +205,36 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         RectF rectF = new RectF(rect);
         paint.setAntiAlias(true);
         canvas.drawARGB(0, 0, 0, 0);
-        canvas.drawRoundRect(rectF, 100, 100, paint);
+        canvas.drawRoundRect(rectF, 50, 50, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return output;
+    }
+    private Bitmap getIconBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth() + 40;
+        int height = bitmap.getHeight() + 40;
+        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+        Paint paint = new Paint();
+        paint.setColor(Color.YELLOW);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(20);
+        paint.setAntiAlias(true);
+        canvas.drawRect(0, 0, width, height, paint);
+        canvas.drawRect(20, 0, width - 20, height, paint);
+        canvas.drawRect(0, 20, width, height - 20, paint);
+        canvas.drawRect(0, height - 20, width, height, paint);
+        canvas.drawBitmap(bitmap, 20, 20, null);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawRect(20, 20, width - 20, height - 20, paint);
+        return outputBitmap;
     }
 
 
     private IconStyle getIconStyle() {
         IconStyle style = new IconStyle();
         style.setRotationType(RotationType.NO_ROTATION);
-        style.setScale(0.5f);
+        style.setScale(0.4f);
         style.setZIndex(0f);
         return style;
     }
@@ -234,6 +256,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         lastUpdate = findViewById(R.id.lastUpdate);
         description = findViewById(R.id.description);
         streetAndKm = findViewById(R.id.streetAndKm);
+        imageIncident = findViewById(R.id.imageIncident);
         layout = findViewById(R.id.frame_layout_r);
         bottomNavigationView.setBackground(null);
         bottomNavigationView.getMenu().getItem(2).setEnabled(false);
