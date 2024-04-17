@@ -10,6 +10,8 @@ import android.graphics.*;
 import android.graphics.Rect;
 import android.location.*;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -23,8 +25,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.example.application.R;
 import com.example.application.Utils;
-import com.example.application.map.IncidentData;
 import com.example.application.fragments.*;
+import com.example.application.map.IncidentData;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
@@ -36,6 +38,7 @@ import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
 import com.yandex.mapkit.map.*;
+import com.yandex.mapkit.map.Map;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.user_location.UserLocationLayer;
 import com.yandex.runtime.image.ImageProvider;
@@ -43,8 +46,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Properties;
+import java.util.*;
 
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
@@ -55,6 +57,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private MapView mapView;
     private ImageView imageIncident;
     private FrameLayout layout;
+    private TextView city;
     private TextView lastUpdate;
     private TextView description;
     private TextView streetAndKm;
@@ -78,14 +81,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         init();
         initPreference();
 
+        Map map = this.mapView.getMapWindow().getMap();
         buttonCrossAdd.setOnClickListener(v -> { // cross
             getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new IncidentFragment()).commit();
         });
         buttonFindMe.setOnClickListener(v -> { // find
-            updateLocation(position.getTarget());
+            if (position != null) {
+                map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
+            }
         });
         buttonChangeTime.setOnClickListener(v -> { // night-mode
-            Map map = this.mapView.getMapWindow().getMap();
             this.isNightMode = !isNightMode;
             map.setNightModeEnabled(this.isNightMode);
             // Preference
@@ -95,7 +100,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             editor.putBoolean("nightMode", isNightMode);
             editor.apply();
         });
-
         if (isLocationPermissionGranted()) {
             FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
             getLocation(fusedLocationClient);
@@ -121,12 +125,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         Task<Location> task = fusedLocationClient.getLastLocation();
         task.addOnSuccessListener(this, location -> {
             if (location != null) {
-                buttonFindMe.show();
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
                 updateLocation(new Point(latitude, longitude));
-            } else
-                buttonFindMe.hide();
+            }
         });
     }
 
@@ -136,8 +138,21 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         map.setRotateGesturesEnabled(false);
         map.setNightModeEnabled(isNightMode);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
-        this.objCollection = map.getMapObjects();
 
+        Point p = position.getTarget();
+        try {
+            Geocoder geocoder = new Geocoder(getApplicationContext(), new Locale("RU"));
+            List<Address> list = geocoder.getFromLocation(p.getLatitude(), p.getLongitude(), 1);
+            String locality = list.get(0).getLocality();
+            if (locality != null) {
+                city.setText(locality);
+                city.setWidth(locality.length() * 45);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.objCollection = map.getMapObjects();
         if (locationLayer == null) {
             locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
             locationLayer.setVisible(true);
@@ -163,8 +178,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
     }
+
     private void addIncident(Bitmap cloneBitmap) {
-        this.objCollection.addPlacemark(object -> {
+        PlacemarkMapObject mapObject = this.objCollection.addPlacemark(object -> {
             Point p = position.getTarget();
             object.setUserData(new IncidentData(p, cloneBitmap, text, this));
             object.setGeometry(p);
@@ -174,6 +190,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             layout.setVisibility(View.VISIBLE);
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
+        disappear(mapObject);
+    }
+
+    private void disappear(MapObject mapObject) {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(() -> objCollection.remove(mapObject), 60 * 1000);
     }
 
     @SuppressLint("SetTextI18n")
@@ -196,6 +218,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         listeners.add(listener);
         this.objCollection.addTapListener(listener);
     }
+
     private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
                 .getHeight(), Bitmap.Config.ARGB_8888);
@@ -210,6 +233,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return output;
     }
+
     private Bitmap getIconBitmap(Bitmap bitmap) {
         int width = bitmap.getWidth() + 40;
         int height = bitmap.getHeight() + 40;
@@ -229,7 +253,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         canvas.drawRect(20, 20, width - 20, height - 20, paint);
         return outputBitmap;
     }
-
 
     private IconStyle getIconStyle() {
         IconStyle style = new IconStyle();
@@ -258,6 +281,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         streetAndKm = findViewById(R.id.streetAndKm);
         imageIncident = findViewById(R.id.imageIncident);
         layout = findViewById(R.id.frame_layout_r);
+        city = findViewById(R.id.city);
         bottomNavigationView.setBackground(null);
         bottomNavigationView.getMenu().getItem(2).setEnabled(false);
         mapView = findViewById(R.id.mapview);

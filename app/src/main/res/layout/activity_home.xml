@@ -21,6 +21,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     tools:context=".activity.HomeActivity" tools:ignore="ExtraText">
+                <TextView
+                        android:text=""
+                        android:textAlignment="center"
+                        android:layout_gravity="center|top"
+                        android:layout_marginTop="40dp"
+                        android:textSize="18sp"
+                        android:background="@drawable/rounded_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:id="@+id/city"/>
                 <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="225dp"
