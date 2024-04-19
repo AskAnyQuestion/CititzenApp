@@ -2,6 +2,9 @@ package com.example.application.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +15,8 @@ import android.location.*;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
+import android.text.SpannableString;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -22,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import com.example.application.R;
 import com.example.application.Utils;
@@ -69,6 +75,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private UserLocationLayer locationLayer;
     private MapObjectCollection objCollection;
     private boolean isNightMode;
+    private final String NEARBY_INCIDENT = "Рядом происшествие";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +107,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             editor.putBoolean("nightMode", isNightMode);
             editor.apply();
         });
+
         if (isLocationPermissionGranted()) {
             FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
             getLocation(fusedLocationClient);
@@ -120,8 +128,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private void getLocation(FusedLocationProviderClient fusedLocationClient) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
             return;
+
         Task<Location> task = fusedLocationClient.getLastLocation();
         task.addOnSuccessListener(this, location -> {
             if (location != null) {
@@ -180,9 +191,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void addIncident(Bitmap cloneBitmap) {
+        Point p = position.getTarget();
+        IncidentData data = new IncidentData(p, cloneBitmap, text, this);
+
         PlacemarkMapObject mapObject = this.objCollection.addPlacemark(object -> {
-            Point p = position.getTarget();
-            object.setUserData(new IncidentData(p, cloneBitmap, text, this));
+            object.setUserData(data);
             object.setGeometry(p);
             object.setIcon(ImageProvider.fromBitmap(cloneBitmap), getIconStyle());
             BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
@@ -190,6 +203,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             layout.setVisibility(View.VISIBLE);
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
+        sendNotification(data);
         disappear(mapObject);
     }
 
@@ -237,6 +251,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private Bitmap getIconBitmap(Bitmap bitmap) {
         int width = bitmap.getWidth() + 40;
         int height = bitmap.getHeight() + 40;
+        int size = 20;
         Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(outputBitmap);
         Paint paint = new Paint();
@@ -245,12 +260,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         paint.setStrokeWidth(20);
         paint.setAntiAlias(true);
         canvas.drawRect(0, 0, width, height, paint);
-        canvas.drawRect(20, 0, width - 20, height, paint);
-        canvas.drawRect(0, 20, width, height - 20, paint);
-        canvas.drawRect(0, height - 20, width, height, paint);
-        canvas.drawBitmap(bitmap, 20, 20, null);
+        canvas.drawRect(size, 0, width - size, height, paint);
+        canvas.drawRect(0, size, width, height - size, paint);
+        canvas.drawRect(0, height - size, width, height, paint);
+        canvas.drawBitmap(bitmap, size, size, null);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawRect(20, 20, width - 20, height - 20, paint);
+        canvas.drawRect(size, size, width - size, height - size, paint);
         return outputBitmap;
     }
 
@@ -292,13 +307,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
         this.isNightMode = preferences.getBoolean("nightMode", false);
     }
-
     private boolean isLocationPermissionGranted() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(
                     this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 122);
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_NOTIFICATION_POLICY,
+                            Manifest.permission.INTERNET
+                    }, 122);
             return false;
         }
         return true;
@@ -351,7 +372,25 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             this.uri = Uri.parse(uri);
             this.text = text;
             return false;
-        } else
-            return true;
+        }
+        return true;
+    }
+
+    private void sendNotification(IncidentData data) {
+        double distance = Utils.calculateDistanceBetweenPoints(position.getTarget(), data.getPoint());
+        NotificationChannel channel = new NotificationChannel(
+                "TEST_CHANNEL",
+                "TEST DESCRIPTION",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+        Notification notification = new NotificationCompat.Builder(this, "TEST_CHANNEL")
+                .setContentTitle(new SpannableString(NEARBY_INCIDENT))
+                .setStyle(new NotificationCompat.InboxStyle()
+                       .addLine(data.getDescription())
+                       .addLine(distance + " км. от вас"))
+                .setSound(Settings.System.DEFAULT_ALARM_ALERT_URI)
+                .setSmallIcon(R.mipmap.ic_launcher).build();
+        notificationManager.notify(1, notification);
     }
 }
