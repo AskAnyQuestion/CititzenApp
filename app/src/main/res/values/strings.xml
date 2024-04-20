@@ -9,6 +9,19 @@
     <string name="showDescription">Описание</string>
     <string name="changeTime">Изменить время</string>
     <string name="incidentImage">Инцидент</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <!--  <string name="hello_blank_fragment">Hello blank fragment</string> -->
+    <string name="alarmNotification">Уведомления</string>
+    <string name="lastNotification">Последнее</string>
+    <string name="addMaterial">1. Загрузите материалы</string>
+    <string name="addSituation">2. Опишите ситуацию</string>
+    <string name="confirmation">3. Подтверждение</string>
+    <string name="upload">Загрузить</string>
+    <string name="description">Описание</string>
+    <string name="notify">Оповестить</string>
+    <string name="edit">Редактировать</string>
+    <string name="options">Настройки</string>
+    <string name="questionAnswer">Вопрос-ответ</string>
+    <string name="termAndCondition">Правила и условия использования</string>
+    <string name="privacyPolicy">Политика конфиденциальности</string>
+    <string name="consentDataProcess">Согласие на обработку данных</string>
+    <string name="noNews">На данный момент новостей нет</string>
 </resources>

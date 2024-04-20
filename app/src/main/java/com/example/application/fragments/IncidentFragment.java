@@ -113,7 +113,6 @@ public class IncidentFragment extends Fragment {
             this.uri = data.getData();
             image.setVisibility(View.VISIBLE);
             materialButton.setVisibility(View.INVISIBLE);
-            textView3.setText("1. Материал загружен");
             image.setImageURI(uri);
         }
     }
