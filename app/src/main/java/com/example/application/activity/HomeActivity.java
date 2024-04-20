@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -75,41 +76,31 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private UserLocationLayer locationLayer;
     private MapObjectCollection objCollection;
     private boolean isNightMode;
+    private boolean isMapInit;
     private final String NEARBY_INCIDENT = "Рядом происшествие";
+
+    private void initMap() {
+        this.MAPKIT_API_KEY = getApiToken();
+        if (isAfterIncident() || isAfterNotification() || isMapInit)
+            return;
+        MapKitFactory.setApiKey(MAPKIT_API_KEY);
+        MapKitFactory.setLocale("ru_RU");
+        MapKitFactory.initialize(this);
+        isMapInit = true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        this.MAPKIT_API_KEY = getApiToken();
-        if (isFirstStart())
-            MapKitFactory.setApiKey(MAPKIT_API_KEY);
+        initMap();
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
-        MapKitFactory.initialize(this);
-        init();
+        initComponents();
         initPreference();
-
-        Map map = this.mapView.getMapWindow().getMap();
-        buttonCrossAdd.setOnClickListener(v -> { // cross
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new IncidentFragment()).commit();
-        });
-        buttonFindMe.setOnClickListener(v -> { // find
-            if (position != null) {
-                map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
-            }
-        });
-        buttonChangeTime.setOnClickListener(v -> { // night-mode
-            this.isNightMode = !isNightMode;
-            map.setNightModeEnabled(this.isNightMode);
-            // Preference
-            SharedPreferences sharedPreferences = getApplicationContext()
-                    .getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("nightMode", isNightMode);
-            editor.apply();
-        });
+        initListener();
 
         if (isLocationPermissionGranted()) {
-            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+            FusedLocationProviderClient fusedLocationClient =
+                    LocationServices.getFusedLocationProviderClient(getApplicationContext());
             getLocation(fusedLocationClient);
         }
     }
@@ -149,19 +140,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         map.setRotateGesturesEnabled(false);
         map.setNightModeEnabled(isNightMode);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
-
-        Point p = position.getTarget();
-        try {
-            Geocoder geocoder = new Geocoder(getApplicationContext(), new Locale("RU"));
-            List<Address> list = geocoder.getFromLocation(p.getLatitude(), p.getLongitude(), 1);
-            String locality = list.get(0).getLocality();
-            if (locality != null) {
-                city.setText(locality);
-                city.setWidth(locality.length() * 45);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        updateCity();
 
         this.objCollection = map.getMapObjects();
         if (locationLayer == null) {
@@ -169,7 +148,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             locationLayer.setVisible(true);
             locationLayer.setHeadingEnabled(true);
         }
-        if (!isFirstStart()) {
+        if (isAfterIncident()) {
             Bitmap bitmap = null;
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);
@@ -183,11 +162,26 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
             /* Добавление инцидента */
             addIncident(bit);
-            /* Просмотр инцидента */
-            watchIncident();
         }
+        /* Просмотр инцидента */
+        watchIncident();
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
+    }
+
+    private void updateCity() {
+        Point p = position.getTarget();
+        try {
+            Geocoder geocoder = new Geocoder(getApplicationContext(), new Locale("RU"));
+            List<Address> list = geocoder.getFromLocation(p.getLatitude(), p.getLongitude(), 1);
+            String locality = list.get(0).getLocality();
+            if (locality != null) {
+                city.setText(locality);
+                city.setWidth(locality.length() * 45);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void addIncident(Bitmap cloneBitmap) {
@@ -205,11 +199,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         });
         sendNotification(data);
         disappear(mapObject);
-    }
-
-    private void disappear(MapObject mapObject) {
-        final Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(() -> objCollection.remove(mapObject), 60 * 1000);
     }
 
     @SuppressLint("SetTextI18n")
@@ -231,6 +220,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         };
         listeners.add(listener);
         this.objCollection.addTapListener(listener);
+    }
+
+    private void disappear(MapObject mapObject) {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(() -> objCollection.remove(mapObject), 60 * 1000);
     }
 
     private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
@@ -286,7 +280,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return textStyle;
     }
 
-    private void init() {
+    private void initComponents() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         buttonCrossAdd = findViewById(R.id.addCross);
         buttonFindMe = findViewById(R.id.findme);
@@ -307,6 +301,28 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
         this.isNightMode = preferences.getBoolean("nightMode", false);
     }
+
+    private void initListener() {
+        Map map = this.mapView.getMapWindow().getMap();
+        buttonCrossAdd.setOnClickListener(v ->
+                getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame_layout, new IncidentFragment()).commit());
+        buttonFindMe.setOnClickListener(v -> {
+            if (position != null) {
+                map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
+            }
+        });
+        buttonChangeTime.setOnClickListener(v -> {
+            this.isNightMode = !isNightMode;
+            map.setNightModeEnabled(this.isNightMode);
+            SharedPreferences sharedPreferences = getApplicationContext()
+                    .getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("nightMode", isNightMode);
+            editor.apply();
+        });
+    }
+
     private boolean isLocationPermissionGranted() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -364,20 +380,34 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return false;
     }
 
-    private boolean isFirstStart() {
+    private boolean isAfterIncident() {
         Intent intent = getIntent();
-        String uri = intent.getStringExtra("imageUri");
+        String uri = intent.getStringExtra("image");
         String text = intent.getStringExtra("text");
+        boolean notification = intent.getBooleanExtra("notification", false);
         if (uri != null && text != null) {
             this.uri = Uri.parse(uri);
             this.text = text;
-            return false;
+            return true;
         }
-        return true;
+        return false;
+    }
+
+    private boolean isAfterNotification() {
+        Intent intent = getIntent();
+        String uri = intent.getStringExtra("image");
+        return intent.getBooleanExtra("notification", false);
     }
 
     private void sendNotification(IncidentData data) {
+        Intent resultIntent = new Intent(this, HomeActivity.class);
+        resultIntent.putExtra("notification", true);
+
         double distance = Utils.calculateDistanceBetweenPoints(position.getTarget(), data.getPoint());
+        @SuppressLint("UnspecifiedImmutableFlag")
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(this, 0, resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationChannel channel = new NotificationChannel(
                 "TEST_CHANNEL",
                 "TEST DESCRIPTION",
@@ -387,10 +417,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         Notification notification = new NotificationCompat.Builder(this, "TEST_CHANNEL")
                 .setContentTitle(new SpannableString(NEARBY_INCIDENT))
                 .setStyle(new NotificationCompat.InboxStyle()
-                       .addLine(data.getDescription())
-                       .addLine(distance + " км. от вас"))
-                .setSound(Settings.System.DEFAULT_ALARM_ALERT_URI)
-                .setSmallIcon(R.mipmap.ic_launcher).build();
+                        .addLine(data.getDescription())
+                        .addLine(distance + " км. от вас"))
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(resultPendingIntent)
+                .setAutoCancel(true)
+                .build();
         notificationManager.notify(1, notification);
     }
 }

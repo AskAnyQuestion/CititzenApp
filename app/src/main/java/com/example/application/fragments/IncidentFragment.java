@@ -87,7 +87,7 @@ public class IncidentFragment extends Fragment {
                 if (!editTextTextPersonName.getEditableText().toString().isEmpty()) {
                     if (checkBox.isChecked()) {
                         Intent intent = new Intent(this.getContext(), HomeActivity.class);
-                        intent.putExtra("imageUri", uri.toString());
+                        intent.putExtra("image", uri.toString());
                         intent.putExtra("text", editTextTextPersonName.getEditableText().toString());
                         startActivity(intent);
                     } else
