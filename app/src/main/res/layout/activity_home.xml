@@ -27,7 +27,7 @@
                         android:layout_gravity="center|top"
                         android:layout_marginTop="40dp"
                         android:textSize="18sp"
-                        android:background="@drawable/rounded_2"
+                        android:background="@drawable/ic_rounded_2"
                         android:layout_width="wrap_content"
                         android:layout_height="30dp"
                         android:id="@+id/city"/>
@@ -37,7 +37,7 @@
                         android:visibility="invisible"
                         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
                         android:id="@+id/frame_layout_r"
-                        android:background="@drawable/rounded">
+                        android:background="@drawable/ic_rounded">
                     <TextView
                             android:layout_marginTop="50dp"
                             android:layout_marginLeft="30dp"
@@ -68,7 +68,7 @@
                     <ImageView android:layout_width="70dp"
                                android:layout_height="wrap_content"
                                android:layout_gravity="center|top"
-                               android:src="@drawable/baseline_remove_24"
+                               android:src="@drawable/ic_baseline_remove_24"
                                android:contentDescription="@string/showDescription">
                     </ImageView>
                     <ImageView
@@ -77,7 +77,7 @@
                             android:layout_marginEnd="30dp"
                             android:layout_width="70dp"
                             android:layout_height="70dp"
-                            android:src="@drawable/baseline_remove_24"
+                            android:src="@drawable/ic_baseline_remove_24"
                             android:id="@+id/imageIncident"
                             android:contentDescription="@string/incidentImage"
                             tools:ignore="RtlHardcoded">

@@ -100,7 +100,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
         if (isLocationPermissionGranted()) {
             FusedLocationProviderClient fusedLocationClient =
-                    LocationServices.getFusedLocationProviderClient(getApplicationContext());
+                    LocationServices.getFusedLocationProviderClient(this);
             getLocation(fusedLocationClient);
         }
     }
@@ -172,7 +172,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private void updateCity() {
         Point p = position.getTarget();
         try {
-            Geocoder geocoder = new Geocoder(getApplicationContext(), new Locale("RU"));
+            Geocoder geocoder = new Geocoder(this, new Locale("RU"));
             List<Address> list = geocoder.getFromLocation(p.getLatitude(), p.getLongitude(), 1);
             String locality = list.get(0).getLocality();
             if (locality != null) {
@@ -297,7 +297,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void initPreference() {
-        SharedPreferences preferences = getApplicationContext().
+        SharedPreferences preferences = this.
                 getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
         this.isNightMode = preferences.getBoolean("nightMode", false);
     }
@@ -315,7 +315,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         buttonChangeTime.setOnClickListener(v -> {
             this.isNightMode = !isNightMode;
             map.setNightModeEnabled(this.isNightMode);
-            SharedPreferences sharedPreferences = getApplicationContext()
+            SharedPreferences sharedPreferences = this
                     .getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("nightMode", isNightMode);

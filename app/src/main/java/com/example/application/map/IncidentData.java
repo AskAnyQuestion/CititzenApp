@@ -8,18 +8,25 @@ import android.location.Geocoder;
 import com.yandex.mapkit.geometry.Point;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
 
 public class IncidentData {
-    private final String description;
-    private final LocalTime time;
-    private final List<Address> addressList;
-    private final Point point;
-    private final Bitmap bitmap;
+    private String description;
+    private LocalTime time;
+    private LocalDateTime dateTime;
+    private List<Address> addressList;
+    private Point point;
+    private Bitmap bitmap;
+
+    public IncidentData() {
+        this.dateTime = LocalDateTime.now();
+    }
 
     public IncidentData(Point point, Bitmap bitmap, String description, Activity activity) {
+        super();
         this.time = LocalTime.now();
         this.description = description.substring(0, 1).toUpperCase() + description.substring(1);
         this.point = point;
@@ -41,6 +48,11 @@ public class IncidentData {
         return String.format("%02d:%02d", time.getHour(), time.getMinute());
     }
 
+    @SuppressLint("DefaultLocale")
+    public CharSequence getDateTime() {
+        return dateTime.getDayOfMonth() + " апреля " + String.format("%02d:%02d", dateTime.getHour(), dateTime.getMinute());
+    }
+
     public String getAddress() {
         return addressList.get(0).getThoroughfare();
     }
@@ -51,5 +63,9 @@ public class IncidentData {
 
     public Bitmap getImage() {
         return bitmap;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
