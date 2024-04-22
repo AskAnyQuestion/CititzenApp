@@ -306,7 +306,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         Map map = this.mapView.getMapWindow().getMap();
         buttonCrossAdd.setOnClickListener(v ->
                 getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_layout, new IncidentFragment()).commit());
+                .replace(R.id.frame_layout_home, new IncidentFragment()).commit());
         buttonFindMe.setOnClickListener(v -> {
             if (position != null) {
                 map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
@@ -361,19 +361,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.home -> {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new HomeFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_home, new HomeFragment()).commit();
                 return true;
             }
             case R.id.profile -> {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new ProfileFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_home, new ProfileFragment()).commit();
                 return true;
             }
             case R.id.news -> {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new NewsFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_home, new NewsFragment()).commit();
                 return true;
             }
             case R.id.alarm -> {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, new AlarmFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_home, new AlarmFragment()).commit();
                 return true;
             }
         }

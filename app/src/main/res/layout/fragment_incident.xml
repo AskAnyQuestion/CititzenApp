@@ -99,21 +99,20 @@
             android:layout_height="28dp" android:id="@+id/textView2"
             app:layout_constraintHorizontal_bias="0.357"
             app:layout_constraintVertical_bias="0.491"/>
-    <Button
-            android:fontFamily="sans-serif-medium"
-            android:text="@string/upload"
-            android:textColor="@color/black"
-            app:cornerRadius="10dp"
-            android:textSize="12sp"
-            app:backgroundTint="@color/white"
-
-            android:layout_width="229dp"
+    <ImageView
+            android:src="@drawable/upload"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:id="@+id/imageUpload"
+            tools:ignore="MissingConstraints"
+            android:contentDescription="@string/upload"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_height="103dp" android:id="@+id/button2"
-            app:layout_constraintVertical_bias="0.244"/>
+            app:layout_constraintVertical_bias="0.200"
+            app:layout_constraintHorizontal_bias="0.500"
+    />
     <TextView
             android:text="@string/addMaterial"
             android:layout_width="260dp"
@@ -127,14 +126,13 @@
             android:layout_height="28dp" android:id="@+id/textView3"
             tools:ignore="HardcodedText,MissingConstraints" app:layout_constraintHorizontal_bias="0.397"
             app:layout_constraintVertical_bias="0.059"/>
-    <ImageView
-            android:visibility="invisible"
-            android:src="@drawable/img"
-            android:layout_width="336dp"
-            android:layout_height="263dp" android:id="@+id/image"
-            tools:ignore="ContentDescription,HardcodedText,MissingConstraints"
-            android:contentDescription="TODO"
+    <androidx.viewpager.widget.ViewPager
+            android:layout_width="340dp"
+            android:layout_height="260dp"
+            android:layout_marginTop="100dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintBottom_toTopOf="@+id/textView2"
-            app:layout_constraintHorizontal_bias="0.496" android:layout_marginBottom="24dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/viewPager"
+            tools:ignore="MissingConstraints"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

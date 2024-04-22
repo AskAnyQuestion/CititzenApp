@@ -11,20 +11,25 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.viewpager.widget.ViewPager;
 import com.example.application.activity.HomeActivity;
 import com.example.application.R;
+import com.example.application.adapters.ViewPagerAdapter;
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
 import static com.example.application.exception.VALIDATE_FIELD.*;
 
 public class IncidentFragment extends Fragment {
     View inflatedView = null;
+    ViewPager viewPage;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final int GALLERY_REQ_CODE = 1000;
-    private Button redButton, materialButton;
-    private ImageView image;
+    private Button redButton;
+    private ArrayList<Uri> chooseImageList;
+    private ImageView uploadImage;
     private TextView textView3;
     private CheckBox checkBox;
     private TextInputEditText editTextTextPersonName;
@@ -67,7 +72,7 @@ public class IncidentFragment extends Fragment {
         this.inflatedView = inflater.inflate(R.layout.fragment_incident, container, false);
         init();
         redButton.setOnClickListener(v -> {
-            if (materialButton.getVisibility() != 0) {
+            if (uploadImage.getVisibility() != 0) {
                 if (!editTextTextPersonName.getEditableText().toString().isEmpty()) {
                     if (checkBox.isChecked()) {
                         Intent intent = new Intent(this.getContext(), HomeActivity.class);
@@ -75,38 +80,52 @@ public class IncidentFragment extends Fragment {
                         intent.putExtra("text", editTextTextPersonName.getEditableText().toString());
                         startActivity(intent);
                     } else
-                        Toast.makeText(this.getContext(), SEND_DATA.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), SEND_DATA.toString(), Toast.LENGTH_LONG).show();
                 } else
-                    Toast.makeText(this.getContext(), FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
             } else
-                Toast.makeText(this.getContext(), MATERIAL_NOT_FOUND.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), MATERIAL_NOT_FOUND.toString(), Toast.LENGTH_LONG).show();
         });
-        materialButton.setOnClickListener(v -> {
-            Intent gallery = new Intent(Intent.ACTION_PICK);
-            gallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(gallery, GALLERY_REQ_CODE);
-        });
+        uploadImage.setOnClickListener(v -> openGallery());
         return inflatedView;
     }
 
+    private void openGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        startActivityForResult(intent, 1);
+    }
+
     @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == GALLERY_REQ_CODE) {
-            assert data != null;
-            this.uri = data.getData();
-            image.setVisibility(View.VISIBLE);
-            materialButton.setVisibility(View.INVISIBLE);
-            image.setImageURI(uri);
-        }
+        if (resultCode == RESULT_OK && requestCode == 1 && data != null && data.getClipData() != null) {
+            int count = data.getClipData().getItemCount();
+            for (int i = 0; i < count; i++) {
+                Uri u = data.getClipData().getItemAt(i).getUri();
+                chooseImageList.add(u);
+                setAdapter();
+            }
+            this.uri = chooseImageList.get(0);
+            uploadImage.setVisibility(View.INVISIBLE);
+        } else
+            Toast.makeText(getContext(), MATERIAL_NOT_FOUND.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    private void setAdapter() {
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this.getContext(), chooseImageList);
+        viewPage.setAdapter(adapter);
     }
 
     public void init() {
         checkBox = inflatedView.findViewById(R.id.checkBox);
         textView3 = inflatedView.findViewById(R.id.textView3);
         redButton = inflatedView.findViewById(R.id.button);
-        materialButton = inflatedView.findViewById(R.id.button2);
-        image = inflatedView.findViewById(R.id.image);
+        uploadImage = inflatedView.findViewById(R.id.imageUpload);
+        viewPage = inflatedView.findViewById(R.id.viewPager);
         editTextTextPersonName = inflatedView.findViewById(R.id.editTextTextPersonName);
+        chooseImageList = new ArrayList<>();
     }
 }

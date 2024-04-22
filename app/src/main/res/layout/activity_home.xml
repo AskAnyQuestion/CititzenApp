@@ -6,11 +6,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black"
-        tools:context=".activity.HomeActivity" tools:ignore="ExtraText">
+        tools:context=".activity.HomeActivity"
+        tools:ignore="ExtraText">
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/frame_layout">
+            android:id="@+id/frame_layout_home">
         <com.yandex.mapkit.mapview.MapView
                 tools:ignore="MissingConstraints"
                 android:id="@+id/mapview"
