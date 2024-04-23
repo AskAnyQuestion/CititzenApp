@@ -141,7 +141,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         map.setNightModeEnabled(isNightMode);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
         updateCity();
-
         this.objCollection = map.getMapObjects();
         if (locationLayer == null) {
             locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());

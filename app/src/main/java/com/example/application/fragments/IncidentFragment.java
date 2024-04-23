@@ -5,12 +5,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.*;
 import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import androidx.viewpager.widget.ViewPager;
 import com.example.application.activity.HomeActivity;
 import com.example.application.R;
@@ -65,7 +63,7 @@ public class IncidentFragment extends Fragment {
         }
     }
 
-    @SuppressLint("WrongConstant")
+    @SuppressLint({"WrongConstant", "ClickableViewAccessibility"})
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -87,6 +85,24 @@ public class IncidentFragment extends Fragment {
                 Toast.makeText(getContext(), MATERIAL_NOT_FOUND.toString(), Toast.LENGTH_LONG).show();
         });
         uploadImage.setOnClickListener(v -> openGallery());
+        viewPage.setOnTouchListener(new View.OnTouchListener() {
+            private static final float SENSITIVITY = 5;
+            float initialX;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN -> initialX = event.getX();
+                    case MotionEvent.ACTION_UP -> {
+                        float currentX = event.getX();
+                        if (Math.abs(initialX - currentX) < SENSITIVITY) {
+                            openGallery();
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        });
         return inflatedView;
     }
 
@@ -101,14 +117,21 @@ public class IncidentFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == 1 && data != null && data.getClipData() != null) {
-            int count = data.getClipData().getItemCount();
-            for (int i = 0; i < count; i++) {
-                Uri u = data.getClipData().getItemAt(i).getUri();
-                chooseImageList.add(u);
+        chooseImageList.clear();
+        if (resultCode == RESULT_OK && requestCode == 1 && data != null) {
+            if (data.getClipData() != null) {
+                int count = data.getClipData().getItemCount();
+                for (int i = 0; i < count; i++) {
+                    Uri u = data.getClipData().getItemAt(i).getUri();
+                    chooseImageList.add(u);
+                    setAdapter();
+                }
+                this.uri = chooseImageList.get(0);
+            } else {
+                this.uri = data.getData();
+                chooseImageList.add(uri);
                 setAdapter();
             }
-            this.uri = chooseImageList.get(0);
             uploadImage.setVisibility(View.INVISIBLE);
         } else
             Toast.makeText(getContext(), MATERIAL_NOT_FOUND.toString(), Toast.LENGTH_LONG).show();
