@@ -1,7 +1,6 @@
 package com.example.application.adapters;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,13 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.application.R;
-import com.example.application.map.IncidentData;
+import com.example.application.model.Incident;
 
-public class NotificationAdapter extends ArrayAdapter<IncidentData> {
+public class NotificationAdapter extends ArrayAdapter<Incident> {
     private final Context context;
-    private final IncidentData[] data;
+    private final Incident[] data;
 
-    public NotificationAdapter(Context context, IncidentData[] data) {
+    public NotificationAdapter(Context context, Incident[] data) {
         super(context, R.layout.item_alarm, data);
         this.context = context;
         this.data = data;

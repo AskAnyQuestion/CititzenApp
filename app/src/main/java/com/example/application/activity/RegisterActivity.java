@@ -12,7 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.example.application.R;
 import com.example.application.Utils;
-import com.example.application.exception.VALIDATE_FIELD;
+import com.example.application.async.RegistrationRequestTask;
+import com.example.application.exception.VALIDATOR;
+import com.example.application.model.User;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -24,6 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputEditText textInputEditTextLoginReg;
     private TextInputEditText textInputEditTextPasswordReg;
     private TextInputEditText textInputEditTextPasswordRepeatReg;
+    private TextInputEditText textInputEditTextTelephoneReg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
         alphaAnimation.setFillAfter(true);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(() -> startAnimation(alphaAnimation), 500);
-        buttonReg.setOnClickListener(v -> openHomeActivity());
+        buttonReg.setOnClickListener(v -> validate());
         textViewReg.setOnClickListener(v -> returnToLogin());
     }
 
@@ -46,35 +49,40 @@ public class RegisterActivity extends AppCompatActivity {
         finish();
     }
 
-    public void openHomeActivity() {
-        Editable phoneEdit = textInputEditTextLoginReg.getEditableText();
-        Editable loginEdit  = textInputEditTextLoginReg.getEditableText();
-        Editable passwordEdit  = textInputEditTextPasswordReg.getEditableText();
-        Editable repeatPasswordEdit  = textInputEditTextPasswordRepeatReg.getEditableText();
+    public void validate() {
+        Editable phoneEdit = textInputEditTextTelephoneReg.getEditableText();
+        Editable loginEdit = textInputEditTextLoginReg.getEditableText();
+        Editable passwordEdit = textInputEditTextPasswordReg.getEditableText();
+        Editable repeatPasswordEdit = textInputEditTextPasswordRepeatReg.getEditableText();
 
-        if (phoneEdit.length() == 0 || loginEdit.length() == 0 ||
-                passwordEdit.length() == 0 || repeatPasswordEdit.length() == 0)
-            Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
-        else if (phoneEdit.length() > 10 ||
-                 loginEdit.length() > 16 ||
-                 passwordEdit.length() > 32 ||
-                 repeatPasswordEdit.length() > 32
-        )
-            Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
+        String strPhone = phoneEdit.toString();
+        if (phoneEdit.length() == 0 || loginEdit.length() == 0 || passwordEdit.length() == 0 || repeatPasswordEdit.length() == 0)
+            Toast.makeText(RegisterActivity.this, VALIDATOR.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
+        else if (phoneEdit.length() > 10 || loginEdit.length() > 16 || passwordEdit.length() > 32 || repeatPasswordEdit.length() > 32)
+            Toast.makeText(RegisterActivity.this, VALIDATOR.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
         else if (!passwordEdit.toString().equals(repeatPasswordEdit.toString()))
-            Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.PASSWORD_MISMATCH.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this, VALIDATOR.PASSWORD_MISMATCH.toString(), Toast.LENGTH_LONG).show();
+        else if (!Utils.isNumber(strPhone))
+            Toast.makeText(RegisterActivity.this, VALIDATOR.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         else {
-            String str = phoneEdit.toString();
-            if (Utils.isNumber(str)) {
-                Long phone = Long.parseLong(str);
-                String password = textInputEditTextPasswordReg.getEditableText().toString();
-                Intent intent = new Intent(this, HomeActivity.class);
-                startActivity(intent);
-                finish();
+            Long phone = Long.parseLong("8".concat(strPhone));
+            String login = loginEdit.toString();
+            String password = passwordEdit.toString();
+            User user = new User(phone, login, password);
+            try {
+                RegistrationRequestTask task = new RegistrationRequestTask(user);
+                task.execute();
+                openHomeActivity();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            else
-                Toast.makeText(RegisterActivity.this, VALIDATE_FIELD.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void openHomeActivity() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void startAnimation(AlphaAnimation alphaAnimation) {
@@ -96,7 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
         buttonReg = findViewById(R.id.buttonReg);
         textViewReg = findViewById(R.id.textViewReg);
         textInputEditTextLoginReg = findViewById(R.id.textInputEditTextLoginReg);
-        TextInputEditText textInputEditTextTelephoneReg = findViewById(R.id.textInputEditTextTelephoneReg);
+        textInputEditTextTelephoneReg = findViewById(R.id.textInputEditTextTelephoneReg);
         textInputEditTextPasswordReg = findViewById(R.id.textInputEditTextPasswordReg);
         textInputEditTextPasswordRepeatReg = findViewById(R.id.textInputEditTextPasswordRepeatReg);
     }

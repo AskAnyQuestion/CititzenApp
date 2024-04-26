@@ -1,4 +1,4 @@
-package com.example.application.map;
+package com.example.application.model;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -13,7 +13,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
 
-public class IncidentData {
+public class Incident {
     private String description;
     private LocalTime time;
     private LocalDateTime dateTime;
@@ -21,11 +21,11 @@ public class IncidentData {
     private Point point;
     private Bitmap bitmap;
 
-    public IncidentData() {
+    public Incident() {
         this.dateTime = LocalDateTime.now();
     }
 
-    public IncidentData(Point point, Bitmap bitmap, String description, Activity activity) {
+    public Incident(Point point, Bitmap bitmap, String description, Activity activity) {
         super();
         this.time = LocalTime.now();
         this.description = description.substring(0, 1).toUpperCase() + description.substring(1);

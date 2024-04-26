@@ -33,7 +33,7 @@ import androidx.core.content.ContextCompat;
 import com.example.application.R;
 import com.example.application.Utils;
 import com.example.application.fragments.*;
-import com.example.application.map.IncidentData;
+import com.example.application.model.Incident;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
@@ -185,7 +185,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private void addIncident(Bitmap cloneBitmap) {
         Point p = position.getTarget();
-        IncidentData data = new IncidentData(p, cloneBitmap, text, this);
+        Incident data = new Incident(p, cloneBitmap, text, this);
 
         PlacemarkMapObject mapObject = this.objCollection.addPlacemark(object -> {
             object.setUserData(data);
@@ -203,7 +203,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     @SuppressLint("SetTextI18n")
     private void watchIncident() {
         MapObjectTapListener listener = (mapObject, point) -> {
-            IncidentData data = (IncidentData) mapObject.getUserData();
+            Incident data = (Incident) mapObject.getUserData();
             if (data != null) {
                 String lastUpdateMessage = "Последнее обновление: ";
                 Point incidentPoint = data.getPoint();
@@ -398,7 +398,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return intent.getBooleanExtra("notification", false);
     }
 
-    private void sendNotification(IncidentData data) {
+    private void sendNotification(Incident data) {
         Intent resultIntent = new Intent(this, HomeActivity.class);
         resultIntent.putExtra("notification", true);
 

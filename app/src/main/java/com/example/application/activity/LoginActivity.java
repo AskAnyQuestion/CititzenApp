@@ -15,7 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.example.application.R;
 import com.example.application.Utils;
-import com.example.application.exception.VALIDATE_FIELD;
+import com.example.application.async.AuthorizationRequestTask;
+import com.example.application.async.RegistrationRequestTask;
+import com.example.application.exception.VALIDATOR;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -63,34 +65,42 @@ public class LoginActivity extends AppCompatActivity {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.postDelayed(() -> startAnimation(alphaAnimation), 500);
         }
-        button.setOnClickListener(v -> openHomeActivity());
+        button.setOnClickListener(v -> validate());
         textViewRegister.setOnClickListener(v -> openRegisterActivity());
     }
 
-    public void openHomeActivity() {
-        Editable editPhone = textInputEditTextTelephoneLogin.getEditableText();
-        Editable editPassword = textInputEditTextPasswordLogin.getEditableText();
+    public void validate() {
+        Editable phoneEdit = textInputEditTextTelephoneLogin.getEditableText();
+        Editable passwordEdit = textInputEditTextPasswordLogin.getEditableText();
 
-        if (editPhone.length() == 0 || editPassword.length() == 0)
-            Toast.makeText(LoginActivity.this, VALIDATE_FIELD.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
-        else if (editPhone.length() > 10 ||
-                editPassword.length() > 32)
-            Toast.makeText(LoginActivity.this, VALIDATE_FIELD.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
-        else if (editPhone.length() != 10)
-            Toast.makeText(LoginActivity.this, VALIDATE_FIELD.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
+        String strPhone = phoneEdit.toString();
+        if (phoneEdit.length() == 0 || passwordEdit.length() == 0)
+            Toast.makeText(LoginActivity.this, VALIDATOR.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
+        else if (phoneEdit.length() > 10 || passwordEdit.length() > 32)
+            Toast.makeText(LoginActivity.this, VALIDATOR.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
+        else if (phoneEdit.length() != 10)
+            Toast.makeText(LoginActivity.this, VALIDATOR.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
+        else if (!Utils.isNumber(strPhone))
+            Toast.makeText(LoginActivity.this, VALIDATOR.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         else {
-            String str = editPhone.toString();
-            if (Utils.isNumber(str)) {
-                Long phone = Long.parseLong(str);
-                String password = textInputEditTextPasswordLogin.getEditableText().toString();
-                Intent intent = new Intent(this, HomeActivity.class);
-                startActivity(intent);
-                finish();
+            Long phone = Long.parseLong("8".concat(strPhone));
+            String password = passwordEdit.toString();
+            try {
+                AuthorizationRequestTask task = new AuthorizationRequestTask(phone, password);
+                task.execute();
+                openHomeActivity();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            else
-                Toast.makeText(LoginActivity.this, VALIDATE_FIELD.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         }
     }
+
+    public void openHomeActivity() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
 
     public void openRegisterActivity() {
         Intent intent = new Intent(this, RegisterActivity.class);

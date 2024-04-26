@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.Nullable;
@@ -18,7 +17,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.application.exception.VALIDATE_FIELD.*;
+import static com.example.application.exception.VALIDATOR.*;
 
 public class IncidentFragment extends Fragment {
     View inflatedView = null;

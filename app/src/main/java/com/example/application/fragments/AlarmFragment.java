@@ -1,7 +1,6 @@
 package com.example.application.fragments;
 
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -9,10 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
 import com.example.application.adapters.NotificationAdapter;
-import com.example.application.map.IncidentData;
-
-import java.util.ArrayList;
-import java.util.Objects;
+import com.example.application.model.Incident;
 
 public class AlarmFragment extends Fragment {
 
@@ -59,8 +55,8 @@ public class AlarmFragment extends Fragment {
         this.inflatedView = inflater.inflate(R.layout.fragment_alarm, container, false);
         init();
         // ListView
-        IncidentData[] dataArr = new IncidentData[1];
-        IncidentData data = new IncidentData();
+        Incident[] dataArr = new Incident[1];
+        Incident data = new Incident();
         data.setDescription("Группа мигрантов устроила разбойное нападение");
         dataArr[0] = data;
         // Adapter
