@@ -17,7 +17,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.application.exception.VALIDATOR.*;
+import static com.example.application.exception.CLIENT.*;
 
 public class IncidentFragment extends Fragment {
     View inflatedView = null;

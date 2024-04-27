@@ -4,20 +4,21 @@ import android.os.AsyncTask;
 import com.example.application.model.User;
 import com.example.application.retrofit.RetrofitService;
 import com.example.application.retrofit.UserAPI;
+import retrofit2.Call;
 
 
-public class RegistrationRequestTask extends AsyncTask<Void, Void, Void> {
+public class RegistrationRequestTask extends AsyncTask<Void, Void, Call<Integer>> {
     private final User user;
     public RegistrationRequestTask(User user) {
         this.user = user;
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Call<Integer> doInBackground(Void... voids) {
         RetrofitService retrofitService = new RetrofitService();
         UserAPI userAPI = retrofitService.getRetrofit().create(UserAPI.class);
-        userAPI.registration(user);
-        return null;
+        Call<Integer> call = userAPI.registration(user);
+        return call;
     }
 
     @Override
@@ -26,7 +27,7 @@ public class RegistrationRequestTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected void onPostExecute(Void unused) {
+    protected void onPostExecute(Call<Integer> unused) {
         super.onPostExecute(unused);
     }
 }

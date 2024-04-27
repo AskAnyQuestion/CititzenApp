@@ -1,23 +1,23 @@
 package com.example.application.async;
 
 import android.os.AsyncTask;
+import com.example.application.retrofit.LoginData;
 import com.example.application.retrofit.RetrofitService;
 import com.example.application.retrofit.UserAPI;
+import retrofit2.Call;
 
-public class AuthorizationRequestTask extends AsyncTask<Void, Void, Void> {
-    private final Long phone;
-    private final String password;
-    public AuthorizationRequestTask(Long phone, String password) {
-        this.phone = phone;
-        this.password = password;
+public class AuthorizationRequestTask extends AsyncTask<Void, Void, Call<Integer>> {
+    private final LoginData loginData;
+    public AuthorizationRequestTask(LoginData loginData) {
+        this.loginData = loginData;
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Call<Integer> doInBackground(Void... voids) {
         RetrofitService retrofitService = new RetrofitService();
         UserAPI userAPI = retrofitService.getRetrofit().create(UserAPI.class);
-        userAPI.authorization(phone, password);
-        return null;
+        Call<Integer> call = userAPI.authorization(loginData);
+        return call;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class AuthorizationRequestTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected void onPostExecute(Void unused) {
+    protected void onPostExecute(Call<Integer> unused) {
         super.onPostExecute(unused);
     }
 }

@@ -13,10 +13,15 @@ import android.os.Bundle;
 import com.example.application.R;
 import com.example.application.Utils;
 import com.example.application.async.RegistrationRequestTask;
-import com.example.application.exception.VALIDATOR;
+import com.example.application.exception.SERVER;
+import com.example.application.exception.CLIENT;
 import com.example.application.model.User;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import org.jetbrains.annotations.NotNull;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
     private TextInputLayout textInputLayoutPasswordReg, textInputLayoutRepeatPasswordReg,
@@ -57,13 +62,13 @@ public class RegisterActivity extends AppCompatActivity {
 
         String strPhone = phoneEdit.toString();
         if (phoneEdit.length() == 0 || loginEdit.length() == 0 || passwordEdit.length() == 0 || repeatPasswordEdit.length() == 0)
-            Toast.makeText(RegisterActivity.this, VALIDATOR.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this, CLIENT.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
         else if (phoneEdit.length() > 10 || loginEdit.length() > 16 || passwordEdit.length() > 32 || repeatPasswordEdit.length() > 32)
-            Toast.makeText(RegisterActivity.this, VALIDATOR.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this, CLIENT.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
         else if (!passwordEdit.toString().equals(repeatPasswordEdit.toString()))
-            Toast.makeText(RegisterActivity.this, VALIDATOR.PASSWORD_MISMATCH.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this, CLIENT.PASSWORD_MISMATCH.toString(), Toast.LENGTH_LONG).show();
         else if (!Utils.isNumber(strPhone))
-            Toast.makeText(RegisterActivity.this, VALIDATOR.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this, CLIENT.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         else {
             Long phone = Long.parseLong("8".concat(strPhone));
             String login = loginEdit.toString();
@@ -72,7 +77,25 @@ public class RegisterActivity extends AppCompatActivity {
             try {
                 RegistrationRequestTask task = new RegistrationRequestTask(user);
                 task.execute();
-                openHomeActivity();
+                Call<Integer> call = task.get();
+                call.enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                        Integer t = response.body();
+                        if (t != null) {
+                            if (t.equals(200))
+                                openHomeActivity();
+                            else
+                                onFailure(call, new Throwable(SERVER.USER_ALREADY_ACCESS.toString()));
+                        } else
+                            onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                        Toast.makeText(RegisterActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }

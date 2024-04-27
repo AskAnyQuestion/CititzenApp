@@ -2,7 +2,7 @@ package com.example.application.exception;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum VALIDATOR {
+public enum CLIENT {
     FILL_FIELD("Пожалуйста, заполните все поля"),
     LONG_VALUE("Слишком длинное значение поля"),
     INVALID_PHONE_NUMBER("Некорректный номер телефона"),
@@ -11,7 +11,7 @@ public enum VALIDATOR {
     MATERIAL_NOT_FOUND("Материал не загружен");
 
     final String s;
-    VALIDATOR(String s) {
+    CLIENT(String s) {
         this.s = s;
     }
 

@@ -16,10 +16,15 @@ import android.os.Bundle;
 import com.example.application.R;
 import com.example.application.Utils;
 import com.example.application.async.AuthorizationRequestTask;
-import com.example.application.async.RegistrationRequestTask;
-import com.example.application.exception.VALIDATOR;
+import com.example.application.exception.CLIENT;
+import com.example.application.exception.SERVER;
+import com.example.application.retrofit.LoginData;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import org.jetbrains.annotations.NotNull;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private ImageView imageView;
@@ -75,20 +80,39 @@ public class LoginActivity extends AppCompatActivity {
 
         String strPhone = phoneEdit.toString();
         if (phoneEdit.length() == 0 || passwordEdit.length() == 0)
-            Toast.makeText(LoginActivity.this, VALIDATOR.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, CLIENT.FILL_FIELD.toString(), Toast.LENGTH_LONG).show();
         else if (phoneEdit.length() > 10 || passwordEdit.length() > 32)
-            Toast.makeText(LoginActivity.this, VALIDATOR.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, CLIENT.LONG_VALUE.toString(), Toast.LENGTH_LONG).show();
         else if (phoneEdit.length() != 10)
-            Toast.makeText(LoginActivity.this, VALIDATOR.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, CLIENT.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         else if (!Utils.isNumber(strPhone))
-            Toast.makeText(LoginActivity.this, VALIDATOR.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, CLIENT.INVALID_PHONE_NUMBER.toString(), Toast.LENGTH_LONG).show();
         else {
             Long phone = Long.parseLong("8".concat(strPhone));
             String password = passwordEdit.toString();
+            LoginData loginData = new LoginData(phone, password);
             try {
-                AuthorizationRequestTask task = new AuthorizationRequestTask(phone, password);
+                AuthorizationRequestTask task = new AuthorizationRequestTask(loginData);
                 task.execute();
-                openHomeActivity();
+                Call<Integer> call = task.get();
+                call.enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                        Integer t = response.body();
+                        if (t != null) {
+                            if (t.equals(200))
+                                openHomeActivity();
+                            else
+                                onFailure(call, new Throwable(SERVER.WRONG_COMBINATION.toString()));
+                        } else
+                            onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                        Toast.makeText(LoginActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
