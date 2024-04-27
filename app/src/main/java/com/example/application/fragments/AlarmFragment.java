@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
 import com.example.application.adapters.NotificationAdapter;
-import com.example.application.model.Incident;
+import com.example.application.map.IncidentMap;
 
 public class AlarmFragment extends Fragment {
 
@@ -55,8 +55,8 @@ public class AlarmFragment extends Fragment {
         this.inflatedView = inflater.inflate(R.layout.fragment_alarm, container, false);
         init();
         // ListView
-        Incident[] dataArr = new Incident[1];
-        Incident data = new Incident();
+        IncidentMap[] dataArr = new IncidentMap[1];
+        IncidentMap data = new IncidentMap();
         data.setDescription("Группа мигрантов устроила разбойное нападение");
         dataArr[0] = data;
         // Adapter

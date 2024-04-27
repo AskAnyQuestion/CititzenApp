@@ -1,7 +1,7 @@
 package com.example.application.async;
 
 import android.os.AsyncTask;
-import com.example.application.retrofit.LoginData;
+import com.example.application.data.LoginData;
 import com.example.application.retrofit.RetrofitService;
 import com.example.application.retrofit.UserAPI;
 import retrofit2.Call;

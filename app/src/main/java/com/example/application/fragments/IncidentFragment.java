@@ -1,9 +1,16 @@
 package com.example.application.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.Nullable;
@@ -30,11 +37,11 @@ public class IncidentFragment extends Fragment {
     private TextView textView3;
     private CheckBox checkBox;
     private TextInputEditText editTextTextPersonName;
-    private Uri uri;
     private String mParam1;
     private String mParam2;
 
-    public IncidentFragment() {}
+    public IncidentFragment() {
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -73,7 +80,7 @@ public class IncidentFragment extends Fragment {
                 if (!editTextTextPersonName.getEditableText().toString().isEmpty()) {
                     if (checkBox.isChecked()) {
                         Intent intent = new Intent(this.getContext(), HomeActivity.class);
-                        intent.putExtra("image", uri.toString());
+                        intent.putExtra("images", chooseImageList);
                         intent.putExtra("text", editTextTextPersonName.getEditableText().toString());
                         startActivity(intent);
                     } else
@@ -87,6 +94,7 @@ public class IncidentFragment extends Fragment {
         viewPage.setOnTouchListener(new View.OnTouchListener() {
             private static final float SENSITIVITY = 5;
             float initialX;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -121,13 +129,12 @@ public class IncidentFragment extends Fragment {
             if (data.getClipData() != null) {
                 int count = data.getClipData().getItemCount();
                 for (int i = 0; i < count; i++) {
-                    Uri u = data.getClipData().getItemAt(i).getUri();
-                    chooseImageList.add(u);
+                    Uri uri = data.getClipData().getItemAt(i).getUri();
+                    chooseImageList.add(uri);
                     setAdapter();
                 }
-                this.uri = chooseImageList.get(0);
             } else {
-                this.uri = data.getData();
+                Uri uri = data.getData();
                 chooseImageList.add(uri);
                 setAdapter();
             }

@@ -1,4 +1,4 @@
-package com.example.application.retrofit;
+package com.example.application.data;
 
 public class LoginData {
     private Long phone;

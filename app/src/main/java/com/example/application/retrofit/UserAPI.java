@@ -1,5 +1,6 @@
 package com.example.application.retrofit;
 
+import com.example.application.data.LoginData;
 import com.example.application.model.User;
 import retrofit2.Call;
 import retrofit2.http.Body;

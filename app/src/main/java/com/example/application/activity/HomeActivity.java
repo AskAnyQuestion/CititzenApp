@@ -16,6 +16,7 @@ import android.location.*;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.SpannableString;
 import android.view.MenuItem;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,8 +34,10 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import com.example.application.R;
 import com.example.application.Utils;
+import com.example.application.async.AddIncidentRequestTask;
+import com.example.application.exception.SERVER;
 import com.example.application.fragments.*;
-import com.example.application.model.Incident;
+import com.example.application.map.IncidentMap;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
@@ -50,17 +54,21 @@ import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.user_location.UserLocationLayer;
 import com.yandex.runtime.image.ImageProvider;
 import org.jetbrains.annotations.NotNull;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
     private final ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
     private String MAPKIT_API_KEY;
     private String text;
-    private Uri uri;
+    private ArrayList <Uri> uri;
+    private ArrayList <Bitmap> bitmaps;
     private MapView mapView;
     private ImageView imageIncident;
     private FrameLayout layout;
@@ -129,12 +137,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             if (location != null) {
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
-                updateLocation(new Point(latitude, longitude));
+                try {
+                    updateLocation(new Point(latitude, longitude));
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
 
-    private void updateLocation(Point point) {
+    private void updateLocation(Point point) throws ExecutionException, InterruptedException {
         this.position = new CameraPosition(point, 17, 0, 0);
         Map map = mapView.getMapWindow().getMap();
         map.setRotateGesturesEnabled(false);
@@ -150,17 +162,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         if (isAfterIncident()) {
             Bitmap bitmap = null;
             try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
+                InputStream inputStream = getContentResolver().openInputStream(uri.get(0));
                 bitmap = BitmapFactory.decodeStream(inputStream);
-            } catch (IOException e) {
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, true);
-            Bitmap cloneBitmap = getIconBitmap(scaledBitmap);
-            Bitmap bit = getRoundedCornerBitmap(cloneBitmap);
-
+            Bitmap iconBitmap = getIconBitmap(scaledBitmap);
+            Bitmap bmp = getRoundedCornerBitmap(iconBitmap);
             /* Добавление инцидента */
-            addIncident(bit);
+            generateIncident(bmp);
         }
         /* Просмотр инцидента */
         watchIncident();
@@ -183,32 +194,51 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         }
     }
 
-    private void addIncident(Bitmap cloneBitmap) {
-        Point p = position.getTarget();
-        Incident data = new Incident(p, cloneBitmap, text, this);
+    private void generateIncident(Bitmap bitmap) throws ExecutionException, InterruptedException {
+        IncidentMap incidentMap = new IncidentMap(text, position.getTarget(), bitmap, this);
+        AddIncidentRequestTask task = new AddIncidentRequestTask(incidentMap, uri, bitmaps, this);
+        task.execute();
+        Call<Integer> call = task.get();
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                Integer t = response.body();
+                if (t != null && t.equals(200))
+                    addIncidentToMap(incidentMap);
+                else
+                    onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
+            }
 
+            @Override
+            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                Toast.makeText(HomeActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+        sendNotification(incidentMap);
+    }
+
+    private void addIncidentToMap(IncidentMap incidentMap) {
         PlacemarkMapObject mapObject = this.objCollection.addPlacemark(object -> {
-            object.setUserData(data);
-            object.setGeometry(p);
-            object.setIcon(ImageProvider.fromBitmap(cloneBitmap), getIconStyle());
+            object.setUserData(incidentMap);
+            object.setGeometry(incidentMap.getPoint());
+            object.setIcon(ImageProvider.fromBitmap(incidentMap.getImage()), getIconStyle());
             BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
             bottomSheetBehavior.setPeekHeight(0, true);
             layout.setVisibility(View.VISIBLE);
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
-        sendNotification(data);
         disappear(mapObject);
     }
 
     @SuppressLint("SetTextI18n")
     private void watchIncident() {
         MapObjectTapListener listener = (mapObject, point) -> {
-            Incident data = (Incident) mapObject.getUserData();
+            IncidentMap data = (IncidentMap) mapObject.getUserData();
             if (data != null) {
                 String lastUpdateMessage = "Последнее обновление: ";
                 Point incidentPoint = data.getPoint();
                 double kilometers = Utils.calculateDistanceBetweenPoints(position.getTarget(), incidentPoint);
-                lastUpdate.setText(lastUpdateMessage + data.getTime());
+                lastUpdate.setText(lastUpdateMessage + data.getEventTime());
                 description.setText(data.getDescription());
                 streetAndKm.setText(data.getAddress() + " - " + kilometers + " км.");
                 imageIncident.setImageBitmap(data.getImage());
@@ -305,7 +335,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         Map map = this.mapView.getMapWindow().getMap();
         buttonCrossAdd.setOnClickListener(v ->
                 getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_layout_home, new IncidentFragment()).commit());
+                        .replace(R.id.frame_layout_home, new IncidentFragment()).commit());
         buttonFindMe.setOnClickListener(v -> {
             if (position != null) {
                 map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
@@ -381,11 +411,21 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private boolean isAfterIncident() {
         Intent intent = getIntent();
-        String uri = intent.getStringExtra("image");
+        ArrayList <Uri> uri = intent.getParcelableArrayListExtra("images");
         String text = intent.getStringExtra("text");
         boolean notification = intent.getBooleanExtra("notification", false);
         if (uri != null && text != null) {
-            this.uri = Uri.parse(uri);
+            this.bitmaps = new ArrayList<>();
+            for (Uri u: uri) {
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), u);
+                    bitmaps.add(bitmap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+            this.uri = uri;
             this.text = text;
             return true;
         }
@@ -398,7 +438,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return intent.getBooleanExtra("notification", false);
     }
 
-    private void sendNotification(Incident data) {
+    private void sendNotification(IncidentMap data) {
         Intent resultIntent = new Intent(this, HomeActivity.class);
         resultIntent.putExtra("notification", true);
 

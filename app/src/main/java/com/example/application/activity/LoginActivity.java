@@ -18,7 +18,7 @@ import com.example.application.Utils;
 import com.example.application.async.AuthorizationRequestTask;
 import com.example.application.exception.CLIENT;
 import com.example.application.exception.SERVER;
-import com.example.application.retrofit.LoginData;
+import com.example.application.data.LoginData;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        openHomeActivity(); // Временно
         initViews();
         if (!isNotFirstRun()) {
             ObjectAnimator moveAnimator = ObjectAnimator.ofFloat(

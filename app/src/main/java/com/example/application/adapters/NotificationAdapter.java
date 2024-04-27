@@ -10,13 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.application.R;
-import com.example.application.model.Incident;
+import com.example.application.map.IncidentMap;
 
-public class NotificationAdapter extends ArrayAdapter<Incident> {
+public class NotificationAdapter extends ArrayAdapter<IncidentMap> {
     private final Context context;
-    private final Incident[] data;
+    private final IncidentMap[] data;
 
-    public NotificationAdapter(Context context, Incident[] data) {
+    public NotificationAdapter(Context context, IncidentMap[] data) {
         super(context, R.layout.item_alarm, data);
         this.context = context;
         this.data = data;
@@ -32,7 +32,7 @@ public class NotificationAdapter extends ArrayAdapter<Incident> {
         TextView description = view.findViewById(R.id.textDescription);
         TextView localTime = view.findViewById(R.id.textLocalTime);
         description.setText(data[position].getDescription());
-        localTime.setText(data[position].getDateTime());
+        localTime.setText(data[position].getEventTime());
         return view;
     }
 }
