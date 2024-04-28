@@ -9,7 +9,6 @@ import com.example.application.model.Incident;
 import com.example.application.model.User;
 import com.yandex.mapkit.geometry.Point;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -19,10 +18,11 @@ public class IncidentMap extends Incident {
     private Bitmap bitmap;
     private LocalDateTime eventTime;
 
-    public IncidentMap() {}
+    public IncidentMap() {
+    }
 
-    public IncidentMap(String eventDescription, Point point, Bitmap bitmap, Activity activity) {
-        super(new User(), eventDescription, point);
+    public IncidentMap(User user, String eventDescription, Point point, Bitmap bitmap, Activity activity) {
+        super(user, eventDescription, point);
         this.activity = activity;
         this.bitmap = bitmap;
         this.eventTime = LocalDateTime.now();
@@ -66,6 +66,6 @@ public class IncidentMap extends Incident {
     }
 
     public Incident toIncident() {
-        return new Incident(new User(), this.eventDescription, getPoint());
+        return new Incident(getUser(), getEventDescription(), getPoint());
     }
 }

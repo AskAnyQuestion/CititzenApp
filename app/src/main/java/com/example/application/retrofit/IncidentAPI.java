@@ -2,12 +2,11 @@ package com.example.application.retrofit;
 
 import com.example.application.model.Incident;
 import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.Multipart;
-import retrofit2.http.POST;
-import retrofit2.http.Part;
+import retrofit2.http.*;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -15,4 +14,6 @@ public interface IncidentAPI {
     @Multipart
     @POST("/incident/add")
     Call<Integer> addIncident(@Part("incident") Incident incident, @Part List<MultipartBody.Part> files);
+    @GET("/incident/get")
+    Call<List <Object>> getIncidents();
 }

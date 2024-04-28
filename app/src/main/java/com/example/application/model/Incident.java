@@ -22,6 +22,14 @@ public class Incident {
                 + eventDescription.substring(1);
         this.latitude = point.getLatitude();
         this.longitude = point.getLongitude();
+        this.user = user;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public String getEventDescription() {
+        return eventDescription;
+    }
 }

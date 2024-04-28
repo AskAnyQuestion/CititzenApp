@@ -2,7 +2,9 @@ package com.example.application.activity;
 
 import android.animation.*;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
@@ -28,22 +30,19 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private ImageView imageView;
-    private TextView textViewVillage;
-    private TextView textViewEnter;
     private Button button;
-    private TextInputLayout textInputLayoutPassword;
-    private TextInputLayout textInputLayoutTelephone;
-    private TextView textViewRegister;
+    private TextView textViewVillage, textViewEnter, textViewRegister;
+    private TextInputLayout textInputLayoutPassword, textInputLayoutTelephone;
     private TextInputEditText textInputEditTextTelephoneLogin, textInputEditTextPasswordLogin;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        afterAuthorization();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        openHomeActivity(); // Временно
-        initViews();
-        if (!isNotFirstRun()) {
+        initComponents();
+        if (!afterRegistration()) {
             ObjectAnimator moveAnimator = ObjectAnimator.ofFloat(
                     imageView,
                     "translationY", 0f, -900f);
@@ -108,7 +107,6 @@ public class LoginActivity extends AppCompatActivity {
                         } else
                             onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
                     }
-
                     @Override
                     public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
                         Toast.makeText(LoginActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
@@ -120,12 +118,27 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private boolean afterRegistration() {
+        Bundle argument = getIntent().getExtras();
+        if (argument != null)
+            return argument.getBoolean("isFirstRun");
+        return false;
+    }
+
+    private void afterAuthorization() {
+        SharedPreferences preferences = this.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        long phone = preferences.getLong("phone", 0);
+        String login = preferences.getString("login", null);
+        String password = preferences.getString("password", null);
+        if (login != null || password != null || phone != 0)
+            openHomeActivity();
+    }
+    
     public void openHomeActivity() {
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
         finish();
     }
-
 
     public void openRegisterActivity() {
         Intent intent = new Intent(this, RegisterActivity.class);
@@ -142,7 +155,7 @@ public class LoginActivity extends AppCompatActivity {
         textViewRegister.startAnimation(alphaAnimation);
     }
 
-    private void initViews() {
+    private void initComponents() {
         imageView = findViewById(R.id.imageViewLogin);
         textViewVillage = findViewById(R.id.textViewVillageLogin);
         textViewEnter = findViewById(R.id.textViewEnterLogin);
@@ -152,12 +165,5 @@ public class LoginActivity extends AppCompatActivity {
         textViewRegister = findViewById(R.id.textViewRegistrLogin);
         textInputEditTextTelephoneLogin = findViewById(R.id.textInputEditTextTelephoneLogin);
         textInputEditTextPasswordLogin = findViewById(R.id.textInputEditTextPasswordLogin);
-    }
-
-    private boolean isNotFirstRun() {
-        Bundle argument = getIntent().getExtras();
-        if (argument != null)
-            return argument.getBoolean("isFirstRun");
-        return false;
     }
 }

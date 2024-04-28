@@ -1,6 +1,8 @@
 package com.example.application.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
@@ -32,12 +34,13 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputEditText textInputEditTextPasswordReg;
     private TextInputEditText textInputEditTextPasswordRepeatReg;
     private TextInputEditText textInputEditTextTelephoneReg;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registr);
-        init();
+        initCompoments();
         AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
         alphaAnimation.setDuration(500);
         alphaAnimation.setFillAfter(true);
@@ -73,7 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
             Long phone = Long.parseLong("8".concat(strPhone));
             String login = loginEdit.toString();
             String password = passwordEdit.toString();
-            User user = new User(phone, login, password);
+            this.user = new User(phone, login, password);
             try {
                 RegistrationRequestTask task = new RegistrationRequestTask(user);
                 task.execute();
@@ -103,6 +106,13 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void openHomeActivity() {
+        SharedPreferences sharedPreferences = this.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("phone", user.getPhone());
+        editor.putString("login", user.getLogin());
+        editor.putString("password", user.getPassword());
+        editor.apply();
+
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
         finish();
@@ -118,7 +128,7 @@ public class RegisterActivity extends AppCompatActivity {
         textViewReg.startAnimation(alphaAnimation);
     }
 
-    private void init() {
+    private void initCompoments() {
         textInputLayoutPasswordReg = findViewById(R.id.textInputLayoutPasswordReg);
         textInputLayoutRepeatPasswordReg = findViewById(R.id.textInputLayoutRepeatPasswordReg);
         textInputLayoutTelephoneReg = findViewById(R.id.textInputLayoutTelephoneReg);

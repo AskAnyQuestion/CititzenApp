@@ -35,9 +35,11 @@ import androidx.core.content.ContextCompat;
 import com.example.application.R;
 import com.example.application.Utils;
 import com.example.application.async.AddIncidentRequestTask;
+import com.example.application.async.GetIncidentRequestTask;
 import com.example.application.exception.SERVER;
 import com.example.application.fragments.*;
 import com.example.application.map.IncidentMap;
+import com.example.application.model.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
@@ -65,26 +67,19 @@ import java.util.concurrent.ExecutionException;
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
     private final ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
-    private String MAPKIT_API_KEY;
-    private String text;
-    private ArrayList <Bitmap> bitmaps;
+    private ArrayList<Bitmap> bitmaps;
+    private String MAPKIT_API_KEY, text;
     private MapView mapView;
     private ImageView imageIncident;
     private FrameLayout layout;
-    private TextView city;
-    private TextView lastUpdate;
-    private TextView description;
-    private TextView streetAndKm;
-    private FloatingActionButton buttonCrossAdd;
-    private FloatingActionButton buttonFindMe;
-    private FloatingActionButton buttonChangeTime;
+    private TextView city, lastUpdate, description, streetAndKm;
+    private FloatingActionButton buttonCrossAdd, buttonFindMe, buttonChangeTime;
     private BottomNavigationView bottomNavigationView;
     private CameraPosition position;
     private UserLocationLayer locationLayer;
+    private User user;
     private MapObjectCollection objCollection;
-    private boolean isNightMode;
-    private boolean isMapInit;
-    private final String NEARBY_INCIDENT = "Рядом происшествие";
+    private boolean isNightMode, isMapInit;
 
     private void initMap() {
         this.MAPKIT_API_KEY = getApiToken();
@@ -98,6 +93,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        afterAuthorization();
         initMap();
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
@@ -106,8 +102,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         initListener();
 
         if (isLocationPermissionGranted()) {
-            FusedLocationProviderClient fusedLocationClient =
-                    LocationServices.getFusedLocationProviderClient(this);
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             getLocation(fusedLocationClient);
         }
     }
@@ -187,7 +182,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void generateIncident(Bitmap bitmap) throws ExecutionException, InterruptedException {
-        IncidentMap incidentMap = new IncidentMap(text, position.getTarget(), bitmap, this);
+        IncidentMap incidentMap = new IncidentMap(user, text, position.getTarget(), bitmap, this);
         AddIncidentRequestTask task = new AddIncidentRequestTask(incidentMap, bitmaps, this);
         task.execute();
         Call<Integer> call = task.get();
@@ -318,8 +313,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void initPreference() {
-        SharedPreferences preferences = this.
-                getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
+        SharedPreferences preferences = this.getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
         this.isNightMode = preferences.getBoolean("nightMode", false);
     }
 
@@ -336,8 +330,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         buttonChangeTime.setOnClickListener(v -> {
             this.isNightMode = !isNightMode;
             map.setNightModeEnabled(this.isNightMode);
-            SharedPreferences sharedPreferences = this
-                    .getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = this.getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("nightMode", isNightMode);
             editor.apply();
@@ -403,12 +396,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private boolean isAfterIncident() {
         Intent intent = getIntent();
-        ArrayList <Uri> uri = intent.getParcelableArrayListExtra("images");
+        ArrayList<Uri> uri = intent.getParcelableArrayListExtra("images");
         String text = intent.getStringExtra("text");
         boolean notification = intent.getBooleanExtra("notification", false);
         if (uri != null && text != null) {
             this.bitmaps = new ArrayList<>();
-            for (Uri u: uri) {
+            for (Uri u : uri) {
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), u);
                     bitmaps.add(bitmap);
@@ -429,6 +422,33 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return intent.getBooleanExtra("notification", false);
     }
 
+    private void afterAuthorization() {
+        SharedPreferences preferences = this.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        long phone = preferences.getLong("phone", 0);
+        String login = preferences.getString("login", null);
+        String password = preferences.getString("password", null);
+        this.user = new User(phone, login, password);
+        try {
+            GetIncidentRequestTask task = new GetIncidentRequestTask();
+            task.execute();
+            Call<List<Object>> call = task.get();
+            call.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NotNull Call<List<Object>> call, @NotNull Response<List<Object>> response) {
+                    List<Object> objects = response.body();
+                    System.out.println(); // TODO
+                }
+
+                @Override
+                public void onFailure(@NotNull Call<List<Object>> call, @NotNull Throwable t) {
+                    // TODO
+                }
+            });
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void sendNotification(IncidentMap data) {
         Intent resultIntent = new Intent(this, HomeActivity.class);
         resultIntent.putExtra("notification", true);
@@ -445,7 +465,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
         Notification notification = new NotificationCompat.Builder(this, "TEST_CHANNEL")
-                .setContentTitle(new SpannableString(NEARBY_INCIDENT))
+                .setContentTitle(new SpannableString("Рядом происшествие"))
                 .setStyle(new NotificationCompat.InboxStyle()
                         .addLine(data.getDescription())
                         .addLine(distance + " км. от вас"))
