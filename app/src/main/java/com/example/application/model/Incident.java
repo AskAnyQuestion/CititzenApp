@@ -14,8 +14,7 @@ public class Incident {
     protected Double latitude;
     protected Double longitude;
 
-    public Incident() {
-    }
+    public Incident() {}
 
     public Incident(User user, String eventDescription, Point point) {
         this.eventTime = new Timestamp(new Date().getTime());

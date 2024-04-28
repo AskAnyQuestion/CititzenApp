@@ -67,7 +67,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private final ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
     private String MAPKIT_API_KEY;
     private String text;
-    private ArrayList <Uri> uri;
     private ArrayList <Bitmap> bitmaps;
     private MapView mapView;
     private ImageView imageIncident;
@@ -160,18 +159,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             locationLayer.setHeadingEnabled(true);
         }
         if (isAfterIncident()) {
-            Bitmap bitmap = null;
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(uri.get(0));
-                bitmap = BitmapFactory.decodeStream(inputStream);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, true);
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmaps.get(0), 512, 512, true);
             Bitmap iconBitmap = getIconBitmap(scaledBitmap);
-            Bitmap bmp = getRoundedCornerBitmap(iconBitmap);
+            Bitmap bitmap = getRoundedCornerBitmap(iconBitmap);
             /* Добавление инцидента */
-            generateIncident(bmp);
+            generateIncident(bitmap);
         }
         /* Просмотр инцидента */
         watchIncident();
@@ -196,7 +188,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private void generateIncident(Bitmap bitmap) throws ExecutionException, InterruptedException {
         IncidentMap incidentMap = new IncidentMap(text, position.getTarget(), bitmap, this);
-        AddIncidentRequestTask task = new AddIncidentRequestTask(incidentMap, uri, bitmaps, this);
+        AddIncidentRequestTask task = new AddIncidentRequestTask(incidentMap, bitmaps, this);
         task.execute();
         Call<Integer> call = task.get();
         call.enqueue(new Callback<>() {
@@ -425,7 +417,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 }
 
             }
-            this.uri = uri;
             this.text = text;
             return true;
         }

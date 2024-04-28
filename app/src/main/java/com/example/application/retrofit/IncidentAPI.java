@@ -14,5 +14,5 @@ import java.util.List;
 public interface IncidentAPI {
     @Multipart
     @POST("/incident/add")
-    Call<Integer> addIncident(/*@Body Incident incident, */@Part List<MultipartBody.Part> files);
+    Call<Integer> addIncident(@Part("incident") Incident incident, @Part List<MultipartBody.Part> files);
 }

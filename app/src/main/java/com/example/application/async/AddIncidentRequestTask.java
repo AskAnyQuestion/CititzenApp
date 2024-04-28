@@ -2,10 +2,7 @@ package com.example.application.async;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
-import com.example.application.data.IncidentData;
 import com.example.application.map.IncidentMap;
 import com.example.application.model.Incident;
 import com.example.application.retrofit.IncidentAPI;
@@ -21,10 +18,12 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 public class AddIncidentRequestTask extends AsyncTask<Void, Void, Call<Integer>> {
-    private final IncidentData incidentData;
-    public AddIncidentRequestTask(IncidentMap incidentMap, ArrayList<Uri> uris,
-                                  ArrayList <Bitmap> bitmaps, Context context) {
-        ArrayList <MultipartBody.Part> multipartFiles = new ArrayList<>();
+    private final Incident incident;
+    private final ArrayList <MultipartBody.Part> multipartFiles;
+
+    public AddIncidentRequestTask(IncidentMap incidentMap, ArrayList <Bitmap> bitmaps, Context context) {
+        this.incident = incidentMap.toIncident();
+        this.multipartFiles = new ArrayList<>();
         for (int i = 0; i < bitmaps.size(); i++) {
             try {
                 File f = new File(context.getCacheDir(), "file" + i);
@@ -43,15 +42,13 @@ public class AddIncidentRequestTask extends AsyncTask<Void, Void, Call<Integer>>
                 e.printStackTrace();
             }
         }
-        Incident incident = incidentMap.toIncident();
-        this.incidentData = new IncidentData(incident, multipartFiles);
     }
 
     @Override
     protected Call<Integer> doInBackground(Void... voids) {
         RetrofitService retrofitService = new RetrofitService();
         IncidentAPI incidentAPI = retrofitService.getRetrofit().create(IncidentAPI.class);
-        Call<Integer> call = incidentAPI.addIncident(/*incidentData.getIncident(),*/ incidentData.getList());
+        Call<Integer> call = incidentAPI.addIncident(incident, multipartFiles);
         return call;
     }
 
