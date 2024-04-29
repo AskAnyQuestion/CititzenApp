@@ -1,22 +1,17 @@
 package com.example.application.async;
 
 import android.os.AsyncTask;
-import com.example.application.model.Incident;
 import com.example.application.retrofit.IncidentAPI;
 import com.example.application.retrofit.RetrofitService;
-import okhttp3.Request;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Response;
 
-import java.util.List;
-
-public class GetIncidentRequestTask extends AsyncTask<Void, Void, Call<List <Incident>>> {
+public class GetMaterialRequestTask extends AsyncTask<Void, Void, Call<ResponseBody>> {
     @Override
-    protected Call<List <Incident>> doInBackground(Void... voids) {
+    protected Call<ResponseBody> doInBackground(Void... voids) {
         RetrofitService retrofitService = new RetrofitService();
         IncidentAPI incidentAPI = retrofitService.getRetrofit().create(IncidentAPI.class);
-        return incidentAPI.getIncidents();
+        return incidentAPI.getMaterials();
     }
     @Override
     protected void onPreExecute() {
@@ -24,7 +19,7 @@ public class GetIncidentRequestTask extends AsyncTask<Void, Void, Call<List <Inc
     }
 
     @Override
-    protected void onPostExecute(Call<List <Incident>> unused) {
+    protected void onPostExecute(Call<ResponseBody> unused) {
         super.onPostExecute(unused);
     }
 }

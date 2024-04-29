@@ -16,8 +16,7 @@ public class AuthorizationRequestTask extends AsyncTask<Void, Void, Call<Integer
     protected Call<Integer> doInBackground(Void... voids) {
         RetrofitService retrofitService = new RetrofitService();
         UserAPI userAPI = retrofitService.getRetrofit().create(UserAPI.class);
-        Call<Integer> call = userAPI.authorization(loginData);
-        return call;
+        return userAPI.authorization(loginData);
     }
 
     @Override

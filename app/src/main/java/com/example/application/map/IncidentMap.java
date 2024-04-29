@@ -8,6 +8,7 @@ import android.location.Geocoder;
 import com.example.application.model.Incident;
 import com.example.application.model.User;
 import com.yandex.mapkit.geometry.Point;
+import com.yandex.mapkit.map.CameraPosition;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,8 +22,8 @@ public class IncidentMap extends Incident {
     public IncidentMap() {
     }
 
-    public IncidentMap(User user, String eventDescription, Point point, Bitmap bitmap, Activity activity) {
-        super(user, eventDescription, point);
+    public IncidentMap(User user, String eventDescription, CameraPosition position, Bitmap bitmap, Activity activity) {
+        super(user, eventDescription, position.getTarget());
         this.activity = activity;
         this.bitmap = bitmap;
         this.eventTime = LocalDateTime.now();

@@ -17,8 +17,7 @@ public class RegistrationRequestTask extends AsyncTask<Void, Void, Call<Integer>
     protected Call<Integer> doInBackground(Void... voids) {
         RetrofitService retrofitService = new RetrofitService();
         UserAPI userAPI = retrofitService.getRetrofit().create(UserAPI.class);
-        Call<Integer> call = userAPI.registration(user);
-        return call;
+        return userAPI.registration(user);
     }
 
     @Override

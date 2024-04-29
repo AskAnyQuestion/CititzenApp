@@ -15,5 +15,10 @@ public interface IncidentAPI {
     @POST("/incident/add")
     Call<Integer> addIncident(@Part("incident") Incident incident, @Part List<MultipartBody.Part> files);
     @GET("/incident/get")
-    Call<List <Object>> getIncidents();
+    Call<List <Incident>> getIncidents();
+    @GET("/incident/materials")
+    Call<ResponseBody> getMaterials();
+    @GET("/incident/material/{id}")
+    Call<ResponseBody> getMaterial(@Path("id") String id);
+
 }
