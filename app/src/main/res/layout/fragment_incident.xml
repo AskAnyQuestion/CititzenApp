@@ -115,7 +115,7 @@
     />
     <TextView
             android:text="@string/addMaterial"
-            android:layout_width="260dp"
+            android:layout_width="300dp"
             android:textSize="15sp"
             android:fontFamily="sans-serif-medium"
             android:textColor="@android:color/white"

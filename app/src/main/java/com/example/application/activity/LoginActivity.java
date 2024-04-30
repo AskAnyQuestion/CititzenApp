@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        afterAuthorization();
+        initProfile();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         initComponents();
@@ -125,7 +125,7 @@ public class LoginActivity extends AppCompatActivity {
         return false;
     }
 
-    private void afterAuthorization() {
+    private void initProfile() {
         SharedPreferences preferences = this.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         long phone = preferences.getLong("phone", 0);
         String login = preferences.getString("login", null);

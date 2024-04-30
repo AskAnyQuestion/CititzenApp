@@ -203,9 +203,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             }
 
             @Override
-            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
-                Toast.makeText(HomeActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
-            }
+            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {}
         });
         sendNotification(incident);
     }

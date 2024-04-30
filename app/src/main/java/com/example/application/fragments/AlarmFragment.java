@@ -54,6 +54,7 @@ public class AlarmFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.inflatedView = inflater.inflate(R.layout.fragment_alarm, container, false);
         init();
+        // Fix
         // ListView
         IncidentMap[] dataArr = new IncidentMap[1];
         IncidentMap data = new IncidentMap();

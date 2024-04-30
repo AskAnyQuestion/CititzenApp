@@ -1,6 +1,7 @@
 package com.example.application.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -27,8 +28,9 @@ import static android.app.Activity.RESULT_OK;
 import static com.example.application.exception.CLIENT.*;
 
 public class IncidentFragment extends Fragment {
-    View inflatedView = null;
-    ViewPager viewPage;
+    private static final int MAX_PHOTOS = 4;
+    private View inflatedView = null;
+    private ViewPager viewPage;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private Button redButton;
@@ -43,14 +45,6 @@ public class IncidentFragment extends Fragment {
     public IncidentFragment() {
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment IncidentFragment.
-     */
     public static IncidentFragment newInstance(String param1, String param2) {
         IncidentFragment fragment = new IncidentFragment();
         Bundle args = new Bundle();
@@ -126,8 +120,9 @@ public class IncidentFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         chooseImageList.clear();
         if (resultCode == RESULT_OK && requestCode == 1 && data != null) {
-            if (data.getClipData() != null) {
-                int count = data.getClipData().getItemCount();
+            ClipData clipData = data.getClipData();
+            if (clipData != null) {
+                int count = Math.min(clipData.getItemCount(), MAX_PHOTOS);
                 for (int i = 0; i < count; i++) {
                     Uri uri = data.getClipData().getItemAt(i).getUri();
                     chooseImageList.add(uri);

@@ -29,13 +29,13 @@ public class AddIncidentRequestTask extends AsyncTask<Void, Void, Call<Integer>>
                 File f = new File(context.getCacheDir(), "file" + i);
                 boolean isCreate = f.createNewFile();
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bitmaps.get(i).compress(Bitmap.CompressFormat.PNG, 100, bos);
+                bitmaps.get(i).compress(Bitmap.CompressFormat.JPEG, 100, bos);
                 FileOutputStream fos = new FileOutputStream(f);
                 fos.write(bos.toByteArray());
                 fos.flush();
                 fos.close();
                 MultipartBody.Part filePart = MultipartBody.Part.createFormData(
-                        "files", f.getName().concat(".png"),
+                        "files", f.getName().concat(".jpeg"),
                         RequestBody.create(MediaType.parse("multipart/form-data"), f));
                 multipartFiles.add(filePart);
             } catch (Exception e) {
