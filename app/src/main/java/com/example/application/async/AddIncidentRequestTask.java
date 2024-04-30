@@ -35,7 +35,7 @@ public class AddIncidentRequestTask extends AsyncTask<Void, Void, Call<Integer>>
                 fos.flush();
                 fos.close();
                 MultipartBody.Part filePart = MultipartBody.Part.createFormData(
-                        "files", f.getName(),
+                        "files", f.getName().concat(".png"),
                         RequestBody.create(MediaType.parse("multipart/form-data"), f));
                 multipartFiles.add(filePart);
             } catch (Exception e) {

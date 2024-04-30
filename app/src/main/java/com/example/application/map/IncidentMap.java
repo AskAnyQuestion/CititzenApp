@@ -1,6 +1,5 @@
 package com.example.application.map;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.location.Address;
@@ -17,16 +16,20 @@ import java.util.Locale;
 public class IncidentMap extends Incident {
     private Activity activity;
     private Bitmap bitmap;
-    private LocalDateTime eventTime;
 
     public IncidentMap() {
+    }
+
+    public IncidentMap(User user, String eventDescription, Point point, Bitmap bitmap, Activity activity) {
+        super(user, eventDescription, point);
+        this.activity = activity;
+        this.bitmap = bitmap;
     }
 
     public IncidentMap(User user, String eventDescription, CameraPosition position, Bitmap bitmap, Activity activity) {
         super(user, eventDescription, position.getTarget());
         this.activity = activity;
         this.bitmap = bitmap;
-        this.eventTime = LocalDateTime.now();
     }
 
     public void setDescription(String eventDescription) {
@@ -35,16 +38,6 @@ public class IncidentMap extends Incident {
 
     public String getDescription() {
         return eventDescription;
-    }
-
-    @SuppressLint("DefaultLocale")
-    public CharSequence getEventTime() {
-        return String.format("%02d:%02d", eventTime.getHour(), eventTime.getMinute());
-    }
-
-    @SuppressLint("DefaultLocale")
-    public CharSequence getDateTime() {
-        return eventTime.getDayOfMonth() + " апреля " + String.format("%02d:%02d", eventTime.getHour(), eventTime.getMinute());
     }
 
     public String getAddress() {
@@ -69,4 +62,9 @@ public class IncidentMap extends Incident {
     public Incident toIncident() {
         return new Incident(getUser(), getEventDescription(), getPoint());
     }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
 }

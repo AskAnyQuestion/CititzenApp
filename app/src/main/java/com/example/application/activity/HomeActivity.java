@@ -2,10 +2,7 @@ package com.example.application.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -73,22 +70,23 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
     private final ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
     private ArrayList<Bitmap> bitmaps;
-    private String MAPKIT_API_KEY, text;
-    private MapView mapView;
+    private String text;
+    private Map map;
+    private MapObjectCollection objCollection;
     private ImageView imageIncident;
     private FrameLayout layout;
+    private MapView mapView;
     private TextView city, lastUpdate, description, streetAndKm;
-    private FloatingActionButton buttonCrossAdd, buttonFindMe, buttonChangeTime;
     private BottomNavigationView bottomNavigationView;
+    private FloatingActionButton buttonCrossAdd, buttonFindMe, buttonChangeTime;
     private CameraPosition position;
     private UserLocationLayer locationLayer;
     private User user;
-    private MapObjectCollection objCollection;
     private boolean isNightMode, isMapInit;
 
     private void initMap() {
-        this.MAPKIT_API_KEY = getApiToken();
-        if (incidentCreated() || isNotification() || isMapInit)
+        String MAPKIT_API_KEY = getApiToken();
+        if (incidentCreated() || notificationCreated() || isMapInit || MAPKIT_API_KEY == null)
             return;
         MapKitFactory.setApiKey(MAPKIT_API_KEY);
         MapKitFactory.setLocale("ru_RU");
@@ -99,10 +97,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initMap();
-        initIncidents();
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
         initComponents();
+        initIncidents();
         initPreferences();
         initListeners();
         initUserLocation();
@@ -121,7 +119,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         try {
             InputStream inputStream = getAssets().open("config.properties");
             properties.load(inputStream);
-            return MAPKIT_API_KEY = properties.getProperty("API_TOKEN");
+            return properties.getProperty("API_TOKEN");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -150,14 +148,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void updateUserLocation(Point point) throws ExecutionException, InterruptedException {
-        this.position = new CameraPosition(point, 17, 0, 0);
-
-        Map map = mapView.getMapWindow().getMap();
+        position = new CameraPosition(point, 17, 0, 0);
+        updateCity();
+        map = mapView.getMapWindow().getMap();
         map.setRotateGesturesEnabled(false);
         map.setNightModeEnabled(isNightMode);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
-        updateCity();
-        this.objCollection = map.getMapObjects();
+        objCollection = map.getMapObjects();
         if (locationLayer == null) {
             locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
             locationLayer.setVisible(true);
@@ -214,7 +211,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void addIncidentToMap(IncidentMap incident) {
-        PlacemarkMapObject mapObject = this.objCollection.addPlacemark(object -> {
+        PlacemarkMapObject mapObject = objCollection.addPlacemark(object -> {
             object.setUserData(incident);
             object.setGeometry(incident.getPoint());
             object.setIcon(ImageProvider.fromBitmap(incident.getImage()), getIconStyle());
@@ -244,7 +241,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             return true;
         };
         listeners.add(listener);
-        this.objCollection.addTapListener(listener);
+        objCollection.addTapListener(listener);
     }
 
     private void disappear(MapObject mapObject) {
@@ -322,12 +319,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void initPreferences() {
-        SharedPreferences preferences = this.getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
-        this.isNightMode = preferences.getBoolean("nightMode", false);
+        SharedPreferences preferences = getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
+        isNightMode = preferences.getBoolean("nightMode", false);
     }
 
     private void initListeners() {
-        Map map = this.mapView.getMapWindow().getMap();
         buttonCrossAdd.setOnClickListener(v ->
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.frame_layout_home, new IncidentFragment()).commit());
@@ -337,9 +333,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             }
         });
         buttonChangeTime.setOnClickListener(v -> {
-            this.isNightMode = !isNightMode;
-            map.setNightModeEnabled(this.isNightMode);
-            SharedPreferences sharedPreferences = this.getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
+            isNightMode = !isNightMode;
+            map.setNightModeEnabled(isNightMode);
+            SharedPreferences sharedPreferences = getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("nightMode", isNightMode);
             editor.apply();
@@ -409,7 +405,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         String text = intent.getStringExtra("text");
         boolean notification = intent.getBooleanExtra("notification", false);
         if (uri != null && text != null) {
-            this.bitmaps = new ArrayList<>();
+            bitmaps = new ArrayList<>();
             for (Uri u : uri) {
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), u);
@@ -417,7 +413,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
             this.text = text;
             return true;
@@ -425,7 +420,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return false;
     }
 
-    private boolean isNotification() {
+    private boolean notificationCreated() {
         Intent intent = getIntent();
         String uri = intent.getStringExtra("image");
         return intent.getBooleanExtra("notification", false);
@@ -436,7 +431,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         long phone = preferences.getLong("phone", 0);
         String login = preferences.getString("login", null);
         String password = preferences.getString("password", null);
-        this.user = new User(phone, login, password);
+        user = new User(phone, login, password);
 
         try {
             GetIncidentRequestTask task = new GetIncidentRequestTask();
@@ -446,7 +441,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 @Override
                 public void onResponse(@NotNull Call<List<Incident>> call, @NotNull Response<List<Incident>> response) {
                     List<Incident> incidents = response.body();
-                    initMaterials(incidents);
+                    try {
+                        if (incidents != null)
+                            initMaterials(incidents);
+                    } catch (ExecutionException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
                 @Override
@@ -459,35 +459,66 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         }
     }
 
-    private void initMaterials(List<Incident> incidents) {
-        try {
-            GetMaterialRequestTask task = new GetMaterialRequestTask();
-            task.execute();
-            Call<ResponseBody> call = task.get();
-            call.enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
-                    ResponseBody rb = response.body();
-                    assert rb != null;
-                    ZipInputStream stream = new ZipInputStream(rb.byteStream());
-                    try {
-                        ZipEntry entry;
-                        while ((entry = stream.getNextEntry()) != null)
-                            System.out.println(entry.getName());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+    private void initMaterials(List<Incident> incidents) throws ExecutionException, InterruptedException {
+        HashMap<Integer, List<Bitmap>> hashMap = new HashMap<>();
+        GetMaterialRequestTask task = new GetMaterialRequestTask();
+        task.execute();
+        Call<ResponseBody> call = task.get();
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
+                ResponseBody rb = response.body();
+                assert rb != null;
+                InputStream is = rb.byteStream();
+                /* Чтение архива с материалами */
+                try {
+                    ZipInputStream zis = (is instanceof ZipInputStream) ? (ZipInputStream) is
+                            : new ZipInputStream(new BufferedInputStream(is));
+                    ZipEntry ze;
+                    BitmapFactory.Options opts = new BitmapFactory.Options();
+                    while ((ze = zis.getNextEntry()) != null) {
+                        String entryName = ze.getName();
+                        String folder = entryName.split("/")[0];
+                        Integer folderId = Integer.valueOf(folder);
+                        List<Bitmap> bitmaps = hashMap.get(folderId);
+                        if (bitmaps == null)
+                            bitmaps = new ArrayList<>();
+                        Bitmap preview = BitmapFactory.decodeStream(zis, null, opts);
+                        bitmaps.add(preview);
+                        hashMap.put(folderId, bitmaps);
                     }
+                    zis.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-
-                @Override
-                public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
-                    Toast.makeText(HomeActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                /* Отображение на экране */
+                map = mapView.getMapWindow().getMap();
+                MapObjectCollection collection = map.getMapObjects();
+                for (Incident incident : incidents) {
+                    int id = incident.getId();
+                    List<Bitmap> list = hashMap.get(id);
+                    assert list != null;
+                    Point point = new Point(incident.getLatitude(), incident.getLongitude());
+                    /* Bitmap */
+                    Bitmap preview = list.get(0);
+                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(preview, 512, 512, true);
+                    Bitmap iconBitmap = getIconBitmap(scaledBitmap);
+                    Bitmap bitmap = getRoundedCornerBitmap(iconBitmap);
+                    IncidentMap incidentMap = new IncidentMap(
+                            incident.getUser(),
+                            incident.getEventDescription(),
+                            point,
+                            bitmap,
+                            HomeActivity.this);
+                    addIncidentToMap(incidentMap);
                 }
-            });
+            }
 
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+            @Override
+            public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
+                Toast.makeText(HomeActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void sendNotification(IncidentMap data) {
