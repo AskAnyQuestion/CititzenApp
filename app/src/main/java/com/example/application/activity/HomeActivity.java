@@ -68,7 +68,10 @@ import java.util.zip.ZipInputStream;
 
 public class HomeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
-    private final ArrayList<MapObjectTapListener> listeners = new ArrayList<>();
+    private final ArrayList<MapObjectTapListener> objectListener = new ArrayList<>();
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
+    private final ArrayList<InputListener> mapListener = new ArrayList<>();
+    private BottomSheetBehavior<FrameLayout> bottomSheetBehavior;
     private ArrayList<Bitmap> bitmaps;
     private String text;
     private Map map;
@@ -154,12 +157,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         map.setRotateGesturesEnabled(false);
         map.setNightModeEnabled(isNightMode);
         map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
+        locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
+        locationLayer.setVisible(true);
+        locationLayer.setHeadingEnabled(true);
         objCollection = map.getMapObjects();
-        if (locationLayer == null) {
-            locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
-            locationLayer.setVisible(true);
-            locationLayer.setHeadingEnabled(true);
-        }
         if (incidentCreated()) {
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmaps.get(0), 512, 512, true);
             Bitmap iconBitmap = getIconBitmap(scaledBitmap);
@@ -167,8 +168,27 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             generateIncident(bitmap);
         }
         watchIncident();
+        tapOnMap();
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
+    }
+
+    private void tapOnMap() {
+        InputListener listener = new InputListener() {
+            @Override
+            public void onMapTap(@NonNull Map map, @NonNull Point point) {
+                if (bottomSheetBehavior != null)
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+
+            @Override
+            public void onMapLongTap(@NonNull Map map, @NonNull Point point) {
+                if (bottomSheetBehavior != null)
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+        };
+        map.addInputListener(listener);
+        mapListener.add(listener);
     }
 
     private void updateCity() {
@@ -213,7 +233,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             object.setUserData(incident);
             object.setGeometry(incident.getPoint());
             object.setIcon(ImageProvider.fromBitmap(incident.getImage()), getIconStyle());
-            BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
+            bottomSheetBehavior = BottomSheetBehavior.from(layout);
             bottomSheetBehavior.setPeekHeight(0, true);
             layout.setVisibility(View.VISIBLE);
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -238,7 +258,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             }
             return true;
         };
-        listeners.add(listener);
+        objectListener.add(listener);
         objCollection.addTapListener(listener);
     }
 
