@@ -2,16 +2,9 @@ package com.example.application.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.ClipData;
-import android.content.ContentUris;
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.Nullable;
@@ -19,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 import com.example.application.activity.HomeActivity;
 import com.example.application.R;
-import com.example.application.adapters.ViewPagerAdapter;
+import com.example.application.adapters.ViewPagerUriAdapter;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -126,20 +119,19 @@ public class IncidentFragment extends Fragment {
                 for (int i = 0; i < count; i++) {
                     Uri uri = data.getClipData().getItemAt(i).getUri();
                     chooseImageList.add(uri);
-                    setAdapter();
                 }
             } else {
                 Uri uri = data.getData();
                 chooseImageList.add(uri);
-                setAdapter();
             }
+            setAdapter();
             uploadImage.setVisibility(View.INVISIBLE);
         } else
             Toast.makeText(getContext(), MATERIAL_NOT_FOUND.toString(), Toast.LENGTH_LONG).show();
     }
 
     private void setAdapter() {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this.getContext(), chooseImageList);
+        ViewPagerUriAdapter adapter = new ViewPagerUriAdapter(this.getContext(), chooseImageList);
         viewPage.setAdapter(adapter);
     }
 

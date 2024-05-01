@@ -34,6 +34,11 @@ public class Incident {
         this.user = user;
     }
 
+    public Incident(Integer idIncident, User user, String eventDescription, Point point) {
+        this(user, eventDescription, point);
+        this.idIncident = idIncident;
+    }
+
     public User getUser() {
         return user;
     }

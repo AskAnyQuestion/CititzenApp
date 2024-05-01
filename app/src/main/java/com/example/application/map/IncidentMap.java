@@ -20,8 +20,8 @@ public class IncidentMap extends Incident {
     public IncidentMap() {
     }
 
-    public IncidentMap(User user, String eventDescription, Point point, Bitmap bitmap, Activity activity) {
-        super(user, eventDescription, point);
+    public IncidentMap(Integer id, User user, String eventDescription, Point point, Bitmap bitmap, Activity activity) {
+        super(id, user, eventDescription, point);
         this.activity = activity;
         this.bitmap = bitmap;
     }

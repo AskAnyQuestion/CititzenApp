@@ -29,8 +29,10 @@ import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
 import com.example.application.R;
 import com.example.application.Utils;
+import com.example.application.adapters.ViewPagerBitmapAdapter;
 import com.example.application.async.AddIncidentRequestTask;
 import com.example.application.async.GetIncidentRequestTask;
 import com.example.application.async.GetMaterialRequestTask;
@@ -72,6 +74,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // WeakReference
     private final ArrayList<InputListener> mapListener = new ArrayList<>();
     private BottomSheetBehavior<FrameLayout> bottomSheetBehavior;
+    private HashMap<Integer, ArrayList<Bitmap>> hashMap;
     private ArrayList<Bitmap> bitmaps;
     private String text;
     private Map map;
@@ -79,9 +82,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private ImageView imageIncident;
     private FrameLayout layout;
     private MapView mapView;
-    private TextView city, lastUpdate, description, streetAndKm;
+    private TextView city, lastUpdate, description, streetAndKm, photo;
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton buttonCrossAdd, buttonFindMe, buttonChangeTime;
+    private ViewPager viewPager;
     private CameraPosition position;
     private UserLocationLayer locationLayer;
     private User user;
@@ -177,14 +181,18 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         InputListener listener = new InputListener() {
             @Override
             public void onMapTap(@NonNull Map map, @NonNull Point point) {
-                if (bottomSheetBehavior != null)
+                if (bottomSheetBehavior != null) {
+                    bottomSheetBehavior.setPeekHeight(0, true);
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
             }
 
             @Override
             public void onMapLongTap(@NonNull Map map, @NonNull Point point) {
-                if (bottomSheetBehavior != null)
+                if (bottomSheetBehavior != null) {
+                    bottomSheetBehavior.setPeekHeight(0, true);
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
             }
         };
         map.addInputListener(listener);
@@ -223,7 +231,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             }
 
             @Override
-            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {}
+            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+            }
         });
         sendNotification(incident);
     }
@@ -234,11 +243,41 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             object.setGeometry(incident.getPoint());
             object.setIcon(ImageProvider.fromBitmap(incident.getImage()), getIconStyle());
             bottomSheetBehavior = BottomSheetBehavior.from(layout);
-            bottomSheetBehavior.setPeekHeight(0, true);
+            bottomSheetBehavior.setPeekHeight(0);
             layout.setVisibility(View.VISIBLE);
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            bottomSheetBehavior.setBottomSheetCallback(replaceAlpha());
         });
         disappear(mapObject);
+    }
+
+    private ViewPagerBitmapAdapter getAdapter(int id) {
+        return new ViewPagerBitmapAdapter(getApplicationContext(), hashMap.get(id));
+    }
+
+    private BottomSheetBehavior.BottomSheetCallback replaceAlpha() {
+        BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {}
+
+            @Override
+            public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
+                if (slideOffset >= 1) {
+                    buttonFindMe.setVisibility(View.INVISIBLE);
+                    buttonChangeTime.setVisibility(View.INVISIBLE);
+                    viewPager.setVisibility(View.VISIBLE);
+                    photo.setVisibility(View.VISIBLE);
+                } else if (slideOffset < 1) {
+                    buttonFindMe.setVisibility(View.VISIBLE);
+                    buttonChangeTime.setVisibility(View.VISIBLE);
+                }
+                viewPager.setAlpha(slideOffset);
+                photo.setAlpha(slideOffset);
+                buttonFindMe.setAlpha((float) 0.6 - slideOffset);
+                buttonChangeTime.setAlpha((float) 0.6 - slideOffset);
+            }
+        };
+        return callback;
     }
 
     @SuppressLint("SetTextI18n")
@@ -253,8 +292,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 description.setText(data.getDescription());
                 streetAndKm.setText(data.getAddress() + " - " + kilometers + " км.");
                 imageIncident.setImageBitmap(data.getImage());
+                viewPager.setAdapter(getAdapter(data.getId()));
                 BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                bottomSheetBehavior.setPeekHeight(800, true);
             }
             return true;
         };
@@ -333,7 +373,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         city = findViewById(R.id.city);
         bottomNavigationView.setBackground(null);
         bottomNavigationView.getMenu().getItem(2).setEnabled(false);
+        viewPager = findViewById(R.id.viewPagerHome);
         mapView = findViewById(R.id.mapview);
+        photo = findViewById(R.id.photo);
     }
 
     private void initPreferences() {
@@ -478,7 +520,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     }
 
     private void initMaterials(List<Incident> incidents) throws ExecutionException, InterruptedException {
-        HashMap<Integer, List<Bitmap>> hashMap = new HashMap<>();
+        hashMap = new HashMap<>();
         GetMaterialRequestTask task = new GetMaterialRequestTask();
         task.execute();
         Call<ResponseBody> call = task.get();
@@ -498,7 +540,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                         String entryName = ze.getName();
                         String folder = entryName.split("/")[0];
                         Integer folderId = Integer.valueOf(folder);
-                        List<Bitmap> bitmaps = hashMap.get(folderId);
+                        ArrayList<Bitmap> bitmaps = hashMap.get(folderId);
                         if (bitmaps == null)
                             bitmaps = new ArrayList<>();
                         Bitmap preview = BitmapFactory.decodeStream(zis, null, opts);
@@ -511,7 +553,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 }
                 /* Отображение на экране */
                 map = mapView.getMapWindow().getMap();
-                MapObjectCollection collection = map.getMapObjects();
+                objCollection = map.getMapObjects();
                 for (Incident incident : incidents) {
                     int id = incident.getId();
                     List<Bitmap> list = hashMap.get(id);
@@ -523,6 +565,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                     Bitmap iconBitmap = getIconBitmap(scaledBitmap);
                     Bitmap bitmap = getRoundedCornerBitmap(iconBitmap);
                     IncidentMap incidentMap = new IncidentMap(
+                            incident.getId(),
                             incident.getUser(),
                             incident.getEventDescription(),
                             point,
