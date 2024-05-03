@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.*;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.location.*;
 import android.net.Uri;
 import android.os.Handler;
@@ -16,6 +17,7 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.SpannableString;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -89,6 +91,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private CameraPosition position;
     private UserLocationLayer locationLayer;
     private User user;
+    private DisplayMetrics metrics;
     private boolean isNightMode, isMapInit;
 
     private void initMap() {
@@ -107,13 +110,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         setContentView(R.layout.activity_home);
         super.onCreate(savedInstanceState);
         initComponents();
+        initMetrix();
         initIncidents();
         initPreferences();
         initListeners();
         initUserLocation();
     }
 
-    public void initUserLocation() {
+    private void initUserLocation() {
         if (isLocationPermissionGranted()) {
             FusedLocationProviderClient fusedLocationClient =
                     LocationServices.getFusedLocationProviderClient(this);
@@ -207,7 +211,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             String locality = list.get(0).getLocality();
             if (locality != null) {
                 city.setText(locality);
-                city.setWidth(locality.length() * 45);
+                city.setWidth((int) (locality.length() * metrics.widthPixels * 0.03));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -346,18 +350,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private IconStyle getIconStyle() {
         IconStyle style = new IconStyle();
         style.setRotationType(RotationType.NO_ROTATION);
-        style.setScale(0.4f);
+        style.setScale(metrics.density * 0.12f);
         style.setZIndex(0f);
         return style;
-    }
-
-    private TextStyle getTextStyle() {
-        TextStyle textStyle = new TextStyle();
-        textStyle.setPlacement(TextStyle.Placement.BOTTOM);
-        textStyle.setColor(Color.RED);
-        textStyle.setOffset(5);
-        textStyle.setSize(8);
-        return textStyle;
     }
 
     private void initComponents() {
@@ -381,6 +376,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private void initPreferences() {
         SharedPreferences preferences = getSharedPreferences("NightModePrefs", Context.MODE_PRIVATE);
         isNightMode = preferences.getBoolean("nightMode", false);
+        city.setTextColor(isNightMode ? Color.WHITE : Color.BLACK);
+        city.getBackground().setColorFilter(isNightMode ?
+                Color.BLACK : getResources().getColor(R.color.beige), PorterDuff.Mode.ADD);
     }
 
     private void initListeners() {
@@ -399,6 +397,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("nightMode", isNightMode);
             editor.apply();
+            city.setTextColor(isNightMode ? Color.WHITE : Color.BLACK);
+            city.getBackground().setColorFilter(isNightMode ?
+                    Color.BLACK : getResources().getColor(R.color.beige), PorterDuff.Mode.ADD);
         });
     }
 
@@ -588,16 +589,20 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
         double distance = Utils.calculateDistanceBetweenPoints(position.getTarget(), data.getPoint());
         @SuppressLint("UnspecifiedImmutableFlag")
-        PendingIntent resultPendingIntent =
-                PendingIntent.getActivity(this, 0, resultIntent,
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
+
+        final String CHANNEL_ID = "CITIZEN_ID_CHANNEL";
+        final String CHANNEL_NAME = "CITIZEN_CHANNEL";
+
         NotificationChannel channel = new NotificationChannel(
-                "TEST_CHANNEL",
-                "TEST DESCRIPTION",
+                CHANNEL_ID,
+                CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_DEFAULT);
+
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
-        Notification notification = new NotificationCompat.Builder(this, "TEST_CHANNEL")
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(new SpannableString("Рядом происшествие"))
                 .setStyle(new NotificationCompat.InboxStyle()
                         .addLine(data.getDescription())
@@ -608,5 +613,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 .setAutoCancel(true)
                 .build();
         notificationManager.notify(1, notification);
+    }
+
+    private void initMetrix() {
+        metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
     }
 }

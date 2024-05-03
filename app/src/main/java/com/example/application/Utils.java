@@ -1,11 +1,17 @@
 package com.example.application;
 
+import android.util.DisplayMetrics;
 import com.yandex.mapkit.geometry.Point;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.List;
 
 public class Utils {
+
     public static boolean isNumber(String str) {
         try {
             Long phone = Long.parseLong("8".concat(str));
@@ -13,6 +19,33 @@ public class Utils {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public static String getLocalIPAddress(boolean useIPv4) {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress()) {
+                        String sAddr = addr.getHostAddress();
+                        assert sAddr != null;
+                        boolean isIPv4 = sAddr.indexOf(':') < 0;
+                        if (useIPv4) {
+                            if (isIPv4)
+                                return sAddr;
+                        } else {
+                            if (!isIPv4) {
+                                int delim = sAddr.indexOf('%');
+                                return delim < 0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return "";
     }
 
     public static double calculateDistanceBetweenPoints(Point position, Point incidentPoint) {

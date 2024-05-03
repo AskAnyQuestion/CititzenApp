@@ -1,9 +1,12 @@
 package com.example.application.model;
 
+import com.example.application.Utils;
+
 public class User {
     String login;
     String password;
     Long phone;
+    String ipv4;
 
     public User() {
     }
@@ -12,6 +15,7 @@ public class User {
         this.login = login;
         this.password = password;
         this.phone = phone;
+        this.ipv4 = Utils.getLocalIPAddress(true);
     }
 
     public void setLogin(String login) {

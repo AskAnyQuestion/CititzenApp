@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
+import android.util.DisplayMetrics;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,6 +30,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
+    private DisplayMetrics metrics;
     private ImageView imageView;
     private Button button;
     private TextView textViewVillage, textViewEnter, textViewRegister;
@@ -42,14 +44,15 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         initComponents();
+        initMetrix();
         if (!afterRegistration()) {
             ObjectAnimator moveAnimator = ObjectAnimator.ofFloat(
                     imageView,
-                    "translationY", 0f, -900f);
+                    "translationY", 0f, -metrics.heightPixels * 0.31f);
             ObjectAnimator scaleAnimator = ObjectAnimator.ofPropertyValuesHolder(
                     imageView,
-                    PropertyValuesHolder.ofFloat("scaleX", 1f, 0.8f),
-                    PropertyValuesHolder.ofFloat("scaleY", 1f, 0.8f)
+                    PropertyValuesHolder.ofFloat("scaleX", 1f, 0.75f),
+                    PropertyValuesHolder.ofFloat("scaleY", 1f, 0.75f)
             );
             @SuppressLint("Recycle") AnimatorSet animatorSet = new AnimatorSet();
             animatorSet.playTogether(moveAnimator, scaleAnimator);
@@ -63,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             imageView.setScaleX(0.8f);
             imageView.setScaleY(0.8f);
-            imageView.setTranslationY(-900f);
+            imageView.setTranslationY(-metrics.heightPixels * 0.31f);
             AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
             alphaAnimation.setDuration(500);
             alphaAnimation.setFillAfter(true);
@@ -107,6 +110,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else
                             onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
                     }
+
                     @Override
                     public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
                         Toast.makeText(LoginActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
@@ -125,6 +129,11 @@ public class LoginActivity extends AppCompatActivity {
         return false;
     }
 
+    private void initMetrix() {
+        metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+    }
+
     private void initProfile() {
         SharedPreferences preferences = this.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         long phone = preferences.getLong("phone", 0);
@@ -133,7 +142,7 @@ public class LoginActivity extends AppCompatActivity {
         if (login != null || password != null || phone != 0)
             openHomeActivity();
     }
-    
+
     public void openHomeActivity() {
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);

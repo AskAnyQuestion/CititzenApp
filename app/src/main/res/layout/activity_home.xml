@@ -49,7 +49,8 @@
                     android:layout_alignParentBottom="true"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    tools:context=".activity.HomeActivity" tools:ignore="ExtraText">
+                    tools:context=".activity.HomeActivity"
+                    tools:ignore="ExtraText">
                 <TextView
                         android:text=""
                         android:textAlignment="center"
