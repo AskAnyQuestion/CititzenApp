@@ -2,12 +2,10 @@ package com.example.application.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.*;
 import android.graphics.Rect;
 import android.location.*;
@@ -15,8 +13,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.provider.Settings;
-import android.text.SpannableString;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +25,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import com.example.application.R;
@@ -40,7 +35,7 @@ import com.example.application.async.GetIncidentRequestTask;
 import com.example.application.async.GetMaterialRequestTask;
 import com.example.application.exception.SERVER;
 import com.example.application.fragments.*;
-import com.example.application.map.IncidentMap;
+import com.example.application.data.IncidentMap;
 import com.example.application.model.Incident;
 import com.example.application.model.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -50,6 +45,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
@@ -211,7 +207,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             String locality = list.get(0).getLocality();
             if (locality != null) {
                 city.setText(locality);
-                city.setWidth((int) (locality.length() * metrics.widthPixels * 0.03));
+                city.setWidth((int) (locality.length() * metrics.widthPixels * 0.035));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -238,7 +234,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
             }
         });
-        sendNotification(incident);
     }
 
     private void addIncidentToMap(IncidentMap incident) {
@@ -581,38 +576,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 Toast.makeText(HomeActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void sendNotification(IncidentMap data) {
-        Intent resultIntent = new Intent(this, HomeActivity.class);
-        resultIntent.putExtra("notification", true);
-
-        double distance = Utils.calculateDistanceBetweenPoints(position.getTarget(), data.getPoint());
-        @SuppressLint("UnspecifiedImmutableFlag")
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
-
-        final String CHANNEL_ID = "CITIZEN_ID_CHANNEL";
-        final String CHANNEL_NAME = "CITIZEN_CHANNEL";
-
-        NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT);
-
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(new SpannableString("Рядом происшествие"))
-                .setStyle(new NotificationCompat.InboxStyle()
-                        .addLine(data.getDescription())
-                        .addLine(distance + " км. от вас"))
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(resultPendingIntent)
-                .setAutoCancel(true)
-                .build();
-        notificationManager.notify(1, notification);
     }
 
     private void initMetrix() {

@@ -1,4 +1,4 @@
-package com.example.application.map;
+package com.example.application.data;
 
 import android.app.Activity;
 import android.graphics.Bitmap;

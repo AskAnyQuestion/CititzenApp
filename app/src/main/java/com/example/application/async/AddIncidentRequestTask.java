@@ -3,7 +3,7 @@ package com.example.application.async;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import com.example.application.map.IncidentMap;
+import com.example.application.data.IncidentMap;
 import com.example.application.model.Incident;
 import com.example.application.retrofit.IncidentAPI;
 import com.example.application.retrofit.RetrofitService;

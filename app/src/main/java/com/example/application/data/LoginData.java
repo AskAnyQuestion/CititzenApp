@@ -9,6 +9,7 @@ public class LoginData {
         this.phone = phone;
         this.password = password;
     }
+
     public void setPhone(Long phone) {
         this.phone = phone;
     }

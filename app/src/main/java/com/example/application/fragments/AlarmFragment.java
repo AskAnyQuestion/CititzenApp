@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
 import com.example.application.adapters.NotificationAdapter;
-import com.example.application.map.IncidentMap;
+import com.example.application.data.IncidentMap;
 
 public class AlarmFragment extends Fragment {
 
