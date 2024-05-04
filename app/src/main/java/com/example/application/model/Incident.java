@@ -1,16 +1,12 @@
 package com.example.application.model;
 
 import android.annotation.SuppressLint;
-import com.example.application.map.IncidentMap;
 import com.yandex.mapkit.geometry.Point;
 
 import java.sql.Timestamp;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.Locale;
 

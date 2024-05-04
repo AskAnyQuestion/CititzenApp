@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.*;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.location.*;
 import android.net.Uri;
 import android.os.Handler;
@@ -298,7 +297,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 imageIncident.setImageBitmap(data.getImage());
                 viewPager.setAdapter(getAdapter(data.getId()));
                 BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
-                bottomSheetBehavior.setPeekHeight(800, true);
+                bottomSheetBehavior.setPeekHeight((int) (metrics.heightPixels * 0.27), true);
             }
             return true;
         };

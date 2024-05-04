@@ -1,6 +1,5 @@
 package com.example.application;
 
-import android.util.DisplayMetrics;
 import com.yandex.mapkit.geometry.Point;
 
 import java.math.BigDecimal;

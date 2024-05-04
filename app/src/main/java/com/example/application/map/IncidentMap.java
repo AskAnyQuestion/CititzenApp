@@ -10,7 +10,6 @@ import com.yandex.mapkit.geometry.Point;
 import com.yandex.mapkit.map.CameraPosition;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Locale;
 
 public class IncidentMap extends Incident {

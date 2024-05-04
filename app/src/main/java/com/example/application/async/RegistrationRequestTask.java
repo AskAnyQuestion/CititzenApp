@@ -6,7 +6,6 @@ import com.example.application.retrofit.RetrofitService;
 import com.example.application.retrofit.UserAPI;
 import retrofit2.Call;
 
-
 public class RegistrationRequestTask extends AsyncTask<Void, Void, Call<Integer>> {
     private final User user;
     public RegistrationRequestTask(User user) {

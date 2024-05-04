@@ -4,10 +4,7 @@ import android.os.AsyncTask;
 import com.example.application.model.Incident;
 import com.example.application.retrofit.IncidentAPI;
 import com.example.application.retrofit.RetrofitService;
-import okhttp3.Request;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Response;
 
 import java.util.List;
 
