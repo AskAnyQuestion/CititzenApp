@@ -20,6 +20,7 @@ import com.example.application.exception.CLIENT;
 import com.example.application.model.User;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -76,32 +77,41 @@ public class RegisterActivity extends AppCompatActivity {
             Long phone = Long.parseLong("8".concat(strPhone));
             String login = loginEdit.toString();
             String password = passwordEdit.toString();
-            this.user = new User(phone, login, password);
-            try {
-                RegistrationRequestTask task = new RegistrationRequestTask(user);
-                task.execute();
-                Call<Integer> call = task.get();
-                call.enqueue(new Callback<>() {
-                    @Override
-                    public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
-                        Integer t = response.body();
-                        if (t != null) {
-                            if (t.equals(200))
-                                openHomeActivity();
-                            else
-                                onFailure(call, new Throwable(SERVER.USER_ALREADY_ACCESS.toString()));
-                        } else
-                            onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
-                    }
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    User u = new User(phone, login, password, task.getResult());
+                    registationRequest(u);
+                }
+            });
+        }
+    }
 
-                    @Override
-                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
-                        Toast.makeText(RegisterActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public void registationRequest(User user) {
+        this.user = user;
+        try {
+            RegistrationRequestTask task = new RegistrationRequestTask(user);
+            task.execute();
+            Call<Integer> call = task.get();
+            call.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                    Integer t = response.body();
+                    if (t != null) {
+                        if (t.equals(200))
+                            openHomeActivity();
+                        else
+                            onFailure(call, new Throwable(SERVER.USER_ALREADY_ACCESS.toString()));
+                    } else
+                        onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
+                }
+
+                @Override
+                public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                    Toast.makeText(RegisterActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -111,6 +121,7 @@ public class RegisterActivity extends AppCompatActivity {
         editor.putLong("phone", user.getPhone());
         editor.putString("login", user.getLogin());
         editor.putString("password", user.getPassword());
+        editor.putString("token", user.getToken());
         editor.apply();
 
         Intent intent = new Intent(this, HomeActivity.class);

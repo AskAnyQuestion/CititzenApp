@@ -12,4 +12,6 @@ public interface UserAPI {
 
     @POST("/authorization")
     Call<Integer> authorization(@Body LoginData loginData);
+    @POST("/update")
+    Call<Integer> userUpdate(@Body User user);
 }

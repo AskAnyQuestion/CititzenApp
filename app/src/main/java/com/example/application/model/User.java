@@ -7,15 +7,33 @@ public class User {
     String password;
     Long phone;
     String ipv4;
+    String token;
 
     public User() {
     }
 
-    public User(Long phone, String login, String password) {
+    public User(Long phone, String login, String password, String token) {
         this.login = login;
         this.password = password;
         this.phone = phone;
         this.ipv4 = Utils.getLocalIPAddress(true);
+        this.token = token;
+    }
+
+    public String getIpv4() {
+        return ipv4;
+    }
+
+    public void setIpv4(String ipv4) {
+        this.ipv4 = ipv4;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void setLogin(String login) {

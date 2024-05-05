@@ -257,7 +257,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
     private BottomSheetBehavior.BottomSheetCallback replaceAlpha() {
         BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {}
+            public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
+            }
 
             @Override
             public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
@@ -487,8 +488,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         long phone = preferences.getLong("phone", 0);
         String login = preferences.getString("login", null);
         String password = preferences.getString("password", null);
-        user = new User(phone, login, password);
-
+        String token = preferences.getString("token", null);
+        user = new User(phone, login, password, token);
         try {
             GetIncidentRequestTask task = new GetIncidentRequestTask();
             task.execute();
