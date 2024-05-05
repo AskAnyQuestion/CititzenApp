@@ -66,4 +66,10 @@ public class IncidentMap extends Incident {
         this.bitmap = bitmap;
     }
 
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
+
 }
+
+

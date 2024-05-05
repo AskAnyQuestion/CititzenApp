@@ -45,7 +45,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
@@ -241,11 +240,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
             object.setUserData(incident);
             object.setGeometry(incident.getPoint());
             object.setIcon(ImageProvider.fromBitmap(incident.getImage()), getIconStyle());
-            bottomSheetBehavior = BottomSheetBehavior.from(layout);
-            bottomSheetBehavior.setPeekHeight(0);
-            layout.setVisibility(View.VISIBLE);
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            bottomSheetBehavior.setBottomSheetCallback(replaceAlpha());
         });
         disappear(mapObject);
     }
@@ -367,6 +361,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         viewPager = findViewById(R.id.viewPagerHome);
         mapView = findViewById(R.id.mapview);
         photo = findViewById(R.id.photo);
+        bottomSheetBehavior = BottomSheetBehavior.from(layout);
+        bottomSheetBehavior.setPeekHeight(0);
+        layout.setVisibility(View.VISIBLE);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setBottomSheetCallback(replaceAlpha());
     }
 
     private void initPreferences() {
@@ -561,13 +560,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                     Bitmap scaledBitmap = Bitmap.createScaledBitmap(preview, 512, 512, true);
                     Bitmap iconBitmap = getIconBitmap(scaledBitmap);
                     Bitmap bitmap = getRoundedCornerBitmap(iconBitmap);
-                    IncidentMap incidentMap = new IncidentMap(
-                            incident.getId(),
-                            incident.getUser(),
-                            incident.getEventDescription(),
-                            point,
-                            bitmap,
-                            HomeActivity.this);
+                    IncidentMap incidentMap = new IncidentMap();
+                    incidentMap.setIdIncident(incident.getId());
+                    incidentMap.setUser(incident.getUser());
+                    incidentMap.setEventTime(incident.getTime());
+                    incidentMap.setEventDescription(incident.getEventDescription());
+                    incidentMap.setLatitude(point.getLatitude());
+                    incidentMap.setLongitude(point.getLongitude());
+                    incidentMap.setBitmap(bitmap);
+                    incidentMap.setActivity(HomeActivity.this);
                     addIncidentToMap(incidentMap);
                 }
             }

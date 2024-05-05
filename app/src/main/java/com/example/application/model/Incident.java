@@ -55,6 +55,9 @@ public class Incident {
         return longitude;
     }
 
+    public Timestamp getTime() {
+        return eventTime;
+    }
     @SuppressLint("DefaultLocale")
     public CharSequence getEventTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", new Locale("ru"));
@@ -69,5 +72,29 @@ public class Incident {
             e.printStackTrace();
         }
         return formattedTime;
+    }
+
+    public void setIdIncident(Integer idIncident) {
+        this.idIncident = idIncident;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setEventDescription(String eventDescription) {
+        this.eventDescription = eventDescription;
+    }
+
+    public void setEventTime(Timestamp eventTime) {
+        this.eventTime = eventTime;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }
