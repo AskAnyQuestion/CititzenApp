@@ -4,7 +4,6 @@ public class LoginData {
     private Long phone;
     private String password;
 
-    // Конструктор, геттеры и сеттеры
     public LoginData(Long phone, String password) {
         this.phone = phone;
         this.password = password;

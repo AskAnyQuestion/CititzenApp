@@ -112,7 +112,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         initUserLocation();
     }
 
-    private void initUserLocation() {
+    private  void initUserLocation() {
         if (isLocationPermissionGranted()) {
             FusedLocationProviderClient fusedLocationClient =
                     LocationServices.getFusedLocationProviderClient(this);
@@ -298,7 +298,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private void disappear(MapObject mapObject) {
         final Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(() -> objCollection.remove(mapObject), 30 * 60 * 1000);
+        handler.postDelayed(() -> objCollection.remove(mapObject), 10 * 60 * 1000);
     }
 
     private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
@@ -553,7 +553,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 for (Incident incident : incidents) {
                     int id = incident.getId();
                     List<Bitmap> list = hashMap.get(id);
-                    assert list != null;
+                    if (list == null)
+                        return;
                     Point point = new Point(incident.getLatitude(), incident.getLongitude());
                     /* Bitmap */
                     Bitmap preview = list.get(0);

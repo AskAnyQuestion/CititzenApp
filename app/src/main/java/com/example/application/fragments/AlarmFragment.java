@@ -1,5 +1,7 @@
 package com.example.application.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ListView;
 import androidx.fragment.app.Fragment;
@@ -7,8 +9,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
+import com.example.application.activity.HomeActivity;
 import com.example.application.adapters.NotificationAdapter;
+import com.example.application.async.GetNotificationRequestTask;
 import com.example.application.data.IncidentMap;
+import com.example.application.data.LoginData;
+import com.example.application.data.UserData;
+import com.example.application.model.Incident;
+import com.example.application.model.Notification;
+import com.yandex.mapkit.geometry.Point;
+import okhttp3.ResponseBody;
+import org.jetbrains.annotations.NotNull;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class AlarmFragment extends Fragment {
 
@@ -54,15 +72,37 @@ public class AlarmFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.inflatedView = inflater.inflate(R.layout.fragment_alarm, container, false);
         init();
-        // Fix
-        // ListView
-        IncidentMap[] dataArr = new IncidentMap[1];
-        IncidentMap data = new IncidentMap();
-        data.setDescription("Группа мигрантов устроила разбойное нападение");
-        dataArr[0] = data;
-        // Adapter
-        NotificationAdapter notificationAdapter = new NotificationAdapter(getContext(), dataArr);
-        listView.setAdapter(notificationAdapter);
+        SharedPreferences preferences = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        long phone = preferences.getLong("phone", 0);
+        String login = preferences.getString("login", null);
+        UserData data = new UserData(phone, login);
+        GetNotificationRequestTask task = new GetNotificationRequestTask(data);
+        task.execute();
+        try {
+            Call<List<Notification>> call = task.get();
+            call.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NotNull Call<List<Notification>> call, @NotNull Response<List<Notification>> response) {
+                    List <Notification> notifications = response.body();
+                    List <IncidentMap> incidentMaps = new ArrayList<>();
+                    assert notifications != null;
+                    for (Notification notification: notifications) {
+                        Incident incident = notification.getIncident();
+                        IncidentMap incidentMap = (IncidentMap) incident;
+                        incidentMaps.add(incidentMap);
+                    }
+                    NotificationAdapter notificationAdapter = new NotificationAdapter(getContext(), incidentMaps);
+                    listView.setAdapter(notificationAdapter);
+                }
+
+                @Override
+                public void onFailure(@NotNull Call<List<Notification>> call, @NotNull Throwable t) {
+
+                }
+            });
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         return inflatedView;
     }
 

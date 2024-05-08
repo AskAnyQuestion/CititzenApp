@@ -13,12 +13,16 @@ public class User {
     }
 
     public User(Long phone, String login, String password, String token) {
-        this.login = login;
+        this(phone, login);
         this.password = password;
-        this.phone = phone;
-        this.ipv4 = Utils.getLocalIPAddress(true);
         this.token = token;
     }
+    public User(Long phone, String login) {
+        this.login = login;
+        this.phone = phone;
+        this.ipv4 = Utils.getLocalIPAddress(true);
+    }
+
 
     public String getIpv4() {
         return ipv4;

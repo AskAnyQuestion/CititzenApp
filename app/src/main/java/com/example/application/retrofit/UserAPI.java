@@ -1,17 +1,21 @@
 package com.example.application.retrofit;
 
 import com.example.application.data.LoginData;
+import com.example.application.data.UserData;
+import com.example.application.model.Notification;
 import com.example.application.model.User;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.POST;
+import retrofit2.http.*;
+
+import java.util.List;
 
 public interface UserAPI {
-    @POST("/registration")
+    @POST("/user/registration")
     Call<Integer> registration(@Body User user);
-
-    @POST("/authorization")
+    @POST("/user/authorization")
     Call<Integer> authorization(@Body LoginData loginData);
-    @POST("/update")
+    @POST("/user/update")
     Call<Integer> userUpdate(@Body User user);
+    @POST("/user/get")
+    Call<List<Notification>> get(@Body UserData userData);
 }
