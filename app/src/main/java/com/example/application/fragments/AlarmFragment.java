@@ -4,28 +4,22 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ListView;
+import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
-import com.example.application.activity.HomeActivity;
 import com.example.application.adapters.NotificationAdapter;
+import com.example.application.async.ClearIncidentsRequestTask;
 import com.example.application.async.GetNotificationRequestTask;
-import com.example.application.data.IncidentMap;
-import com.example.application.data.LoginData;
 import com.example.application.data.UserData;
 import com.example.application.model.Incident;
-import com.example.application.model.Notification;
-import com.yandex.mapkit.geometry.Point;
-import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -33,6 +27,7 @@ public class AlarmFragment extends Fragment {
 
     private View inflatedView = null;
     private ListView listView;
+    private TextView clear;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -42,14 +37,6 @@ public class AlarmFragment extends Fragment {
     public AlarmFragment() {
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AlarmFragment.
-     */
     public static AlarmFragment newInstance(String param1, String param2) {
         AlarmFragment fragment = new AlarmFragment();
         Bundle args = new Bundle();
@@ -73,6 +60,12 @@ public class AlarmFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.inflatedView = inflater.inflate(R.layout.fragment_alarm, container, false);
         init();
+        initListener();
+        initNotifications();
+        return inflatedView;
+    }
+
+    private void initNotifications() {
         SharedPreferences preferences = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         long phone = preferences.getLong("phone", 0);
         String login = preferences.getString("login", null);
@@ -93,15 +86,14 @@ public class AlarmFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NotNull Call<List<Incident>> call, @NotNull Throwable t) {
-
                 }
             });
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return inflatedView;
     }
-    private void sort(List <Incident> list) {
+
+    private void sort(List<Incident> list) {
         list.sort((incident1, incident2) -> {
             if (incident1.getTime().before(incident2.getTime()))
                 return 1;
@@ -112,7 +104,35 @@ public class AlarmFragment extends Fragment {
         });
     }
 
+    private void initListener() {
+        clear.setOnClickListener(v -> {
+            SharedPreferences preferences = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            long phone = preferences.getLong("phone", 0);
+            String login = preferences.getString("login", null);
+            UserData data = new UserData(phone, login);
+            ClearIncidentsRequestTask task = new ClearIncidentsRequestTask(data);
+            task.execute();
+            try {
+                Call <Integer> call = task.get();
+                call.enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                        listView.setAdapter(null);
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                    }
+                });
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+
     private void init() {
+        clear = inflatedView.findViewById(R.id.clear);
         listView = inflatedView.findViewById(R.id.listIncident);
     }
 }

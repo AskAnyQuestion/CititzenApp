@@ -19,4 +19,6 @@ public interface UserAPI {
     Call<Integer> userUpdate(@Body User user);
     @POST("/user/get")
     Call<List<Incident>> get(@Body UserData userData);
+    @POST("/user/delete")
+    Call<Integer> delete(@Body UserData userData);
 }

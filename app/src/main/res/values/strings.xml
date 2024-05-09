@@ -26,4 +26,5 @@
     <string name="noNews">На данный момент новостей нет</string>
     <string name="uploadImage">ЗагруженныеИзображения</string>
     <string name="photo">Фото:</string>
+    <string name="clear">Отчистить</string>
 </resources>
