@@ -19,7 +19,8 @@ public class Incident {
     protected Double latitude;
     protected Double longitude;
 
-    public Incident() {}
+    public Incident() {
+    }
 
     public Incident(User user, String eventDescription, Point point) {
         this.eventTime = new Timestamp(new Date().getTime());
@@ -58,6 +59,27 @@ public class Incident {
     public Timestamp getTime() {
         return eventTime;
     }
+
+    @SuppressLint("DefaultLocale")
+    public CharSequence getAlarmTime() {
+        String[] monthNames = {"января", "февраля", "марта", "апреля", "мая", "июня",
+                "июля", "августа", "сентября", "октября", "ноября", "декабря"};
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", new Locale("ru"));
+        String formattedTime = null;
+        try {
+            Date parsedDate = sdf.parse(eventTime.toString());
+            assert parsedDate != null;
+            int day = parsedDate.getDay();
+            int month = parsedDate.getMonth();
+            int hours = parsedDate.getHours();
+            int minutes = parsedDate.getMinutes();
+            formattedTime = String.format("%d %s %02d:%02d", day, monthNames[month - 1], hours, minutes);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return formattedTime;
+    }
+
     @SuppressLint("DefaultLocale")
     public CharSequence getEventTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", new Locale("ru"));

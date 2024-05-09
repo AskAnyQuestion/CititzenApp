@@ -25,6 +25,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -79,24 +80,19 @@ public class AlarmFragment extends Fragment {
         GetNotificationRequestTask task = new GetNotificationRequestTask(data);
         task.execute();
         try {
-            Call<List<Notification>> call = task.get();
+            Call<List<Incident>> call = task.get();
             call.enqueue(new Callback<>() {
                 @Override
-                public void onResponse(@NotNull Call<List<Notification>> call, @NotNull Response<List<Notification>> response) {
-                    List <Notification> notifications = response.body();
-                    List <IncidentMap> incidentMaps = new ArrayList<>();
-                    assert notifications != null;
-                    for (Notification notification: notifications) {
-                        Incident incident = notification.getIncident();
-                        IncidentMap incidentMap = (IncidentMap) incident;
-                        incidentMaps.add(incidentMap);
-                    }
-                    NotificationAdapter notificationAdapter = new NotificationAdapter(getContext(), incidentMaps);
+                public void onResponse(@NotNull Call<List<Incident>> call, @NotNull Response<List<Incident>> response) {
+                    List<Incident> list = response.body();
+                    assert list != null;
+                    sort(list);
+                    NotificationAdapter notificationAdapter = new NotificationAdapter(getContext(), list);
                     listView.setAdapter(notificationAdapter);
                 }
 
                 @Override
-                public void onFailure(@NotNull Call<List<Notification>> call, @NotNull Throwable t) {
+                public void onFailure(@NotNull Call<List<Incident>> call, @NotNull Throwable t) {
 
                 }
             });
@@ -104,6 +100,16 @@ public class AlarmFragment extends Fragment {
             throw new RuntimeException(e);
         }
         return inflatedView;
+    }
+    private void sort(List <Incident> list) {
+        list.sort((incident1, incident2) -> {
+            if (incident1.getTime().before(incident2.getTime()))
+                return 1;
+            else if (incident1.getTime().after(incident2.getTime()))
+                return -1;
+            else
+                return 0;
+        });
     }
 
     private void init() {

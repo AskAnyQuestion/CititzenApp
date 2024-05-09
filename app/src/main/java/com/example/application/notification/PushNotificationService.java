@@ -19,8 +19,9 @@ import androidx.core.app.NotificationCompat;
 import com.example.application.R;
 import com.example.application.Utils;
 import com.example.application.activity.HomeActivity;
+import com.example.application.async.AddNotificationRequestTask;
+import com.example.application.data.NotificationData;
 import com.example.application.model.User;
-import com.example.application.retrofit.NotificationAPI;
 import com.example.application.retrofit.RetrofitService;
 import com.example.application.retrofit.UserAPI;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -31,8 +32,11 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.yandex.mapkit.geometry.Point;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PushNotificationService extends FirebaseMessagingService {
@@ -55,10 +59,14 @@ public class PushNotificationService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull @NotNull RemoteMessage message) {
         Map<String, String> map = message.getData();
         super.onMessageReceived(message);
-        sendNotification(map);
+        try {
+            sendNotification(map);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void sendNotification(Map<String, String> map) {
+    private void sendNotification(Map<String, String> map) throws ExecutionException, InterruptedException {
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -79,10 +87,22 @@ public class PushNotificationService extends FirebaseMessagingService {
             return;
         String userId = map.get("userId");
         String notificationId = map.get("notificationId");
-        RetrofitService retrofitService = new RetrofitService();
-        NotificationAPI notificationAPI = retrofitService.getRetrofit().create(NotificationAPI.class);
-        Call<Integer> call = notificationAPI.add(userId, notificationId);
-        sendMessage(event, distance);
+        NotificationData notificationData = new NotificationData(userId, notificationId);
+
+        AddNotificationRequestTask requestTask = new AddNotificationRequestTask(notificationData);
+        requestTask.execute();
+        Call<Integer> call = requestTask.get();
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                sendMessage(event, distance);
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+
+            }
+        });
     }
 
     private double getLocation(Task<Location> task, Point point) {

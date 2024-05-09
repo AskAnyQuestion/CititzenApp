@@ -7,7 +7,7 @@
         android:layout_height="match_parent">
     <TextView
             android:text=""
-            android:textColor="#525252"
+            android:textSize="17sp"
             android:layout_marginStart="20dp"
             android:gravity="center|left"
             android:layout_width="match_parent"
@@ -16,6 +16,8 @@
             tools:ignore="RtlHardcoded"/>
     <TextView
             android:text=""
+            android:textSize="17sp"
+            android:textColor="#525252"
             android:layout_marginStart="20dp"
             android:gravity="center|left"
             android:layout_width="match_parent"

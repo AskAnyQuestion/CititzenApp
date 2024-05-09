@@ -2,6 +2,7 @@ package com.example.application.retrofit;
 
 import com.example.application.data.LoginData;
 import com.example.application.data.UserData;
+import com.example.application.model.Incident;
 import com.example.application.model.Notification;
 import com.example.application.model.User;
 import retrofit2.Call;
@@ -17,5 +18,5 @@ public interface UserAPI {
     @POST("/user/update")
     Call<Integer> userUpdate(@Body User user);
     @POST("/user/get")
-    Call<List<Notification>> get(@Body UserData userData);
+    Call<List<Incident>> get(@Body UserData userData);
 }
