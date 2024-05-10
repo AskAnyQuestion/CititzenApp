@@ -17,6 +17,9 @@ public interface UserAPI {
     Call<Integer> authorization(@Body LoginData loginData);
     @POST("/user/update")
     Call<Integer> userUpdate(@Body User user);
+    @POST("/user/updates")
+    Call<Integer> updates(@Part("oldLogin") String oldLogin, @Part("oldPhone") Long oldPhone,
+                          @Part("newLogin") String newLogin, @Part("newPhone") Long newPhone);
     @POST("/user/get")
     Call<List<Incident>> get(@Body UserData userData);
     @POST("/user/delete")

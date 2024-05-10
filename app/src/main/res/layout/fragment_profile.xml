@@ -13,6 +13,23 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
+    <TextView
+            android:text="@string/edit"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:layout_marginEnd="10dp"
+            android:autoSizeTextType="uniform"
+            android:layout_width="187dp"
+            android:layout_height="26dp" android:id="@+id/save"
+            tools:ignore="HardcodedText,MissingConstraints"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintVertical_bias="0.019"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -29,52 +46,78 @@
             app:layout_constraintVertical_bias="1.0"
             app:layout_constraintHorizontal_bias="1.0">
 
-        <TextView
-                android:text="@string/questionAnswer"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:gravity="left|top"
-                android:layout_width="148dp"
-                android:layout_height="24dp"
-                android:id="@+id/textViewEnterLogin6"
-                tools:ignore="HardcodedText,MissingConstraints,RtlHardcoded"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+        <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textInputLayoutTelephone"
+                android:layout_marginStart="60dp"
+                android:layout_marginTop="60dp"
+                android:layout_marginEnd="60dp"
+                android:hint="Номер телефона"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                app:prefixText="+7"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintVertical_bias="0.456"
-                android:layout_marginTop="80dp"
-                app:layout_constraintHorizontal_bias="0.498"/>
-        <TextView
-                android:text="@string/options"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:gravity="left|top"
-                android:layout_width="148dp"
-                android:layout_height="24dp"
-                android:id="@+id/textViewEnterLogin5"
-                tools:ignore="HardcodedText,MissingConstraints,RtlHardcoded"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintVertical_bias="0.381"
-                android:layout_marginTop="80dp"
-                app:layout_constraintHorizontal_bias="0.498"/>
-        <ImageView
-                android:src="@drawable/question"
-                android:layout_width="24sp"
-                android:layout_height="24sp"
-                android:id="@+id/imageView7"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:startIconDrawable="@drawable/telephone"
+                app:helperTextTextColor="#FF0000"
+                app:counterEnabled="true"
+                app:counterMaxLength="10"
+                app:counterTextColor="@color/edit_text_box_border"
+                tools:ignore="HardcodedText,MissingConstraints"
+                app:prefixTextColor="@color/edit_text_box_border"
+                app:boxStrokeColor="@color/edit_text_box_border"
+                app:hintTextColor="@color/edit_text_box_border">
+
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/textInputEditTextTelephone"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:inputType="phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:ignore="DuplicateIds"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textInputLayoutLoginReg"
+                android:layout_marginStart="60dp"
+                android:layout_marginTop="-170dp"
+                android:layout_marginEnd="60dp"
+                android:hint="Логин"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                tools:ignore="ContentDescription,MissingConstraints"
-                app:layout_constraintHorizontal_bias="0.214"
-                app:layout_constraintVertical_bias="0.511"/>
+                app:startIconDrawable="@drawable/person"
+                app:helperTextTextColor="#FF0000"
+                app:counterEnabled="true"
+                app:counterMaxLength="16"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                app:counterTextColor="@color/edit_text_box_border"
+                tools:ignore="HardcodedText,MissingConstraints"
+                app:prefixTextColor="@color/edit_text_box_border"
+                app:boxStrokeColor="@color/edit_text_box_border"
+                app:hintTextColor="@color/edit_text_box_border"
+                app:layout_constraintHorizontal_bias="1.0">
+
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/textInputEditTextLogin"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:inputType="text"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:ignore="DuplicateIds"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
         <TextView
                 android:text="@string/termAndCondition"
                 android:fontFamily="sans-serif-medium"
@@ -119,6 +162,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintVertical_bias="0.082"/>
+
         <TextView
                 android:text=""
                 android:layout_marginTop="70dp"
@@ -165,32 +209,7 @@
                 android:layout_marginStart="92dp"
                 tools:ignore="ContentDescription,HardcodedText,MissingConstraints"
                 app:layout_constraintHorizontal_bias="0.569" app:layout_constraintVertical_bias="0.669"/>
-        <ImageView
-                android:src="@drawable/gear"
-                android:layout_width="24sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_height="24sp" android:id="@+id/imageView6"
-                tools:ignore="ContentDescription,HardcodedText,MissingConstraints"
-                app:layout_constraintHorizontal_bias="0.214"
-                app:layout_constraintVertical_bias="0.442"
-        />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <TextView
-            android:text="@string/edit"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:autoSizeTextType="uniform"
-            android:layout_width="187dp"
-            android:layout_height="26dp" android:id="@+id/textViewEnterLogin4"
-            tools:ignore="HardcodedText,MissingConstraints"
-            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="1.0" app:layout_constraintVertical_bias="0.019"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
 

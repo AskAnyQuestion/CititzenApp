@@ -17,7 +17,7 @@
     <string name="upload">Загрузить</string>
     <string name="description">Описание</string>
     <string name="notify">Оповестить</string>
-    <string name="edit">Редактировать</string>
+    <string name="edit">Сохранить изменения</string>
     <string name="options">Настройки</string>
     <string name="questionAnswer">Вопрос-ответ</string>
     <string name="termAndCondition">Правила и условия использования</string>
@@ -27,4 +27,5 @@
     <string name="uploadImage">ЗагруженныеИзображения</string>
     <string name="photo">Фото:</string>
     <string name="clear">Отчистить</string>
+    <string name="login">Login</string>
 </resources>
