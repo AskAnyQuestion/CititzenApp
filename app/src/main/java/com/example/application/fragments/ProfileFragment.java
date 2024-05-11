@@ -1,5 +1,6 @@
 package com.example.application.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
+import com.example.application.activity.RegisterActivity;
 import com.example.application.async.UpdateUserRequestTask;
 import com.example.application.data.UserData;
 import com.example.application.exception.CLIENT;
@@ -81,11 +83,36 @@ public class ProfileFragment extends Fragment {
             else {
                 Long phoneNew = Long.parseLong("8".concat(strPhone));
                 String loginNew = loginEdit.toString();
-                UserData userData = new UserData(phone, login);
                 Toast.makeText(getActivity(), SERVER.SAVE.toString(), Toast.LENGTH_LONG).show();
-                this.login.setText(login);
                 UpdateUserRequestTask task = new UpdateUserRequestTask(login, phone, loginNew, phoneNew);
                 task.execute();
+                try {
+                    Call <Integer> call = task.get();
+                    call.enqueue(new Callback<>() {
+                        @Override
+                        public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                            Integer t = response.body();
+                            if (t == null || !t.equals(200))
+                                onFailure(call, new Throwable(SERVER.USER_ALREADY_ACCESS.toString()));
+                            else {
+                                @SuppressLint("CommitPrefEdits")
+                                SharedPreferences.Editor editor = preferences.edit();
+                                editor.putLong("phone", phoneNew);
+                                editor.putString("login", loginNew);
+                                editor.apply();
+                                Toast.makeText(getActivity(), SERVER.SAVE.toString(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                            Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                this.login.setText(loginNew);
             }
         });
     }

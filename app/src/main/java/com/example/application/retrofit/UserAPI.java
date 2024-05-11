@@ -1,6 +1,7 @@
 package com.example.application.retrofit;
 
 import com.example.application.data.LoginData;
+import com.example.application.data.UpdateData;
 import com.example.application.data.UserData;
 import com.example.application.model.Incident;
 import com.example.application.model.Notification;
@@ -18,8 +19,7 @@ public interface UserAPI {
     @POST("/user/update")
     Call<Integer> userUpdate(@Body User user);
     @POST("/user/updates")
-    Call<Integer> updates(@Part("oldLogin") String oldLogin, @Part("oldPhone") Long oldPhone,
-                          @Part("newLogin") String newLogin, @Part("newPhone") Long newPhone);
+    Call<Integer> updates(@Body UpdateData updateData);
     @POST("/user/get")
     Call<List<Incident>> get(@Body UserData userData);
     @POST("/user/delete")
