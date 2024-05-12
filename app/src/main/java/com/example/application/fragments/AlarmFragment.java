@@ -5,15 +5,18 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
+import com.example.application.activity.HomeActivity;
 import com.example.application.adapters.NotificationAdapter;
 import com.example.application.async.ClearIncidentsRequestTask;
 import com.example.application.async.GetNotificationRequestTask;
 import com.example.application.data.UserData;
+import com.example.application.exception.SERVER;
 import com.example.application.model.Incident;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
@@ -78,14 +81,17 @@ public class AlarmFragment extends Fragment {
                 @Override
                 public void onResponse(@NotNull Call<List<Incident>> call, @NotNull Response<List<Incident>> response) {
                     List<Incident> list = response.body();
-                    assert list != null;
-                    sort(list);
-                    NotificationAdapter notificationAdapter = new NotificationAdapter(getContext(), list);
-                    listView.setAdapter(notificationAdapter);
+                    if (list != null) {
+                        sort(list);
+                        NotificationAdapter notificationAdapter = new NotificationAdapter(getContext(), list);
+                        listView.setAdapter(notificationAdapter);
+                    } else
+                        onFailure(call, new Throwable(SERVER.NOT_ACCESS_NOTIFICATION.toString()));
                 }
 
                 @Override
                 public void onFailure(@NotNull Call<List<Incident>> call, @NotNull Throwable t) {
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         } catch (ExecutionException | InterruptedException e) {

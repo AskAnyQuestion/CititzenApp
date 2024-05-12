@@ -1,5 +1,7 @@
 package com.example.application;
 
+import android.location.Location;
+import com.google.android.gms.tasks.Task;
 import com.yandex.mapkit.geometry.Point;
 
 import java.math.BigDecimal;
@@ -8,6 +10,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Utils {
 
@@ -19,6 +22,16 @@ public class Utils {
             return false;
         }
     }
+
+    public static double getLocation(Task<Location> task, Point point) {
+        AtomicReference<Double> atomic = new AtomicReference<>((double) 0);
+        task.addOnSuccessListener(location -> {
+            Point p = new Point(location.getLatitude(), location.getLongitude());
+            atomic.set(Utils.calculateDistanceBetweenPoints(point, p));
+        });
+        return atomic.get();
+    }
+
 
     public static String getLocalIPAddress(boolean useIPv4) {
         try {

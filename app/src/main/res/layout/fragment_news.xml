@@ -21,18 +21,16 @@
             android:background="@color/black"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-            tools:ignore="MissingConstraints" app:layout_constraintVertical_bias="1.0">
-        <TextView
-                android:text="@string/noNews"
-                android:gravity="center"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:id="@+id/noNews"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            tools:ignore="MissingConstraints" app:layout_constraintVertical_bias="1.0"/>
+    <ListView
+            android:layout_marginTop="60dp"
+            android:id="@+id/listIncidentNews"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+    />
+
     <TextView
-            android:text="г. Иваново"
+            android:text="г. Вичуга"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:textColor="#FFFFFF"

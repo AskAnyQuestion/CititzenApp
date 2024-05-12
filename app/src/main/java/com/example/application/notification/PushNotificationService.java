@@ -82,7 +82,7 @@ public class PushNotificationService extends FirebaseMessagingService {
 
         Point point = new Point(dLatitude, dLongitude);
         Task<Location> task = fusedLocationClient.getLastLocation();
-        double distance = getLocation(task, point);
+        double distance = Utils.getLocation(task, point);
         if (distance >= MESSAGE_SENDING_RADIUS)
             return;
         String userId = map.get("userId");
@@ -99,19 +99,8 @@ public class PushNotificationService extends FirebaseMessagingService {
             }
 
             @Override
-            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
-
-            }
+            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {}
         });
-    }
-
-    private double getLocation(Task<Location> task, Point point) {
-        AtomicReference<Double> atomic = new AtomicReference<>((double) 0);
-        task.addOnSuccessListener(location -> {
-            Point p = new Point(location.getLatitude(), location.getLongitude());
-            atomic.set(Utils.calculateDistanceBetweenPoints(point, p));
-        });
-        return atomic.get();
     }
 
     private void sendMessage(String event, double distance) {

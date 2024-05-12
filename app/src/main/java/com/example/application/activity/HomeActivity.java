@@ -32,7 +32,7 @@ import com.example.application.Utils;
 import com.example.application.adapters.ViewPagerBitmapAdapter;
 import com.example.application.async.AddIncidentRequestTask;
 import com.example.application.async.GetIncidentRequestTask;
-import com.example.application.async.GetMaterialRequestTask;
+import com.example.application.async.GetIncidentMaterialRequestTask;
 import com.example.application.exception.SERVER;
 import com.example.application.fragments.*;
 import com.example.application.data.IncidentMap;
@@ -517,7 +517,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private void initMaterials(List<Incident> incidents) throws ExecutionException, InterruptedException {
         hashMap = new HashMap<>();
-        GetMaterialRequestTask task = new GetMaterialRequestTask();
+        GetIncidentMaterialRequestTask task = new GetIncidentMaterialRequestTask();
         task.execute();
         Call<ResponseBody> call = task.get();
         call.enqueue(new Callback<>() {

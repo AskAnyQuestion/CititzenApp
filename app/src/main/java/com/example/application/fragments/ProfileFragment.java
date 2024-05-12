@@ -12,9 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
-import com.example.application.activity.RegisterActivity;
 import com.example.application.async.UpdateUserRequestTask;
-import com.example.application.data.UserData;
 import com.example.application.exception.CLIENT;
 import com.example.application.exception.SERVER;
 import com.google.android.material.textfield.TextInputEditText;
@@ -103,7 +101,6 @@ public class ProfileFragment extends Fragment {
                                 Toast.makeText(getActivity(), SERVER.SAVE.toString(), Toast.LENGTH_LONG).show();
                             }
                         }
-
                         @Override
                         public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
                             Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_LONG).show();
