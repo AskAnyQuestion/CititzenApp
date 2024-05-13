@@ -24,8 +24,9 @@
     <string name="privacyPolicy">Политика конфиденциальности</string>
     <string name="consentDataProcess">Согласие на обработку данных</string>
     <string name="noNews">На данный момент новостей нет</string>
+    <string name="noNotification">Нет уведомлений</string>
     <string name="uploadImage">ЗагруженныеИзображения</string>
-    <string name="photo">Фото:</string>
+    <string name="photo">Дополнительно:</string>
     <string name="clear">Отчистить</string>
     <string name="login">Login</string>
 </resources>

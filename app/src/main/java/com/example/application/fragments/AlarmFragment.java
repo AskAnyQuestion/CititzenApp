@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.application.R;
-import com.example.application.activity.HomeActivity;
 import com.example.application.adapters.NotificationAdapter;
 import com.example.application.async.ClearIncidentsRequestTask;
 import com.example.application.async.GetNotificationRequestTask;
@@ -31,6 +30,7 @@ public class AlarmFragment extends Fragment {
     private View inflatedView = null;
     private ListView listView;
     private TextView clear;
+    private TextView noNotification;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -82,9 +82,12 @@ public class AlarmFragment extends Fragment {
                 public void onResponse(@NotNull Call<List<Incident>> call, @NotNull Response<List<Incident>> response) {
                     List<Incident> list = response.body();
                     if (list != null) {
+                        noNotification.setVisibility(View.INVISIBLE);
                         sort(list);
-                        NotificationAdapter notificationAdapter = new NotificationAdapter(getContext(), list);
-                        listView.setAdapter(notificationAdapter);
+                        if (getActivity() != null) {
+                            NotificationAdapter notificationAdapter = new NotificationAdapter(getActivity(), list);
+                            listView.setAdapter(notificationAdapter);
+                        }
                     } else
                         onFailure(call, new Throwable(SERVER.NOT_ACCESS_NOTIFICATION.toString()));
                 }
@@ -124,11 +127,11 @@ public class AlarmFragment extends Fragment {
                     @Override
                     public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
                         listView.setAdapter(null);
+                        noNotification.setVisibility(View.VISIBLE);
                     }
 
                     @Override
-                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
-                    }
+                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {}
                 });
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
@@ -140,5 +143,6 @@ public class AlarmFragment extends Fragment {
     private void init() {
         clear = inflatedView.findViewById(R.id.clear);
         listView = inflatedView.findViewById(R.id.listIncident);
+        noNotification = inflatedView.findViewById(R.id.noNotification);
     }
 }

@@ -123,8 +123,10 @@ public class NewsFragment extends Fragment {
                     }
                     zis.close();
                     /* Материалы */
-                    NewsAdapter newsAdapter = new NewsAdapter(getContext(), list, hashMap);
-                    listView.setAdapter(newsAdapter);
+                    if (getActivity() != null) {
+                        NewsAdapter newsAdapter = new NewsAdapter(getContext(), list, hashMap);
+                        listView.setAdapter(newsAdapter);
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

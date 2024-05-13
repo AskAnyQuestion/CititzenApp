@@ -64,18 +64,29 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintVertical_bias="0.0"/>
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
                 android:background="@color/black"
                 android:layout_marginTop="40dp"
                 android:id="@+id/layout"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-                <ListView
-                        android:id="@+id/listIncident"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                />
-        </LinearLayout>
+            <TextView
+                    android:text="@string/noNotification"
+                    android:gravity="center"
+                    android:textColor="#FFFFFF"
+                    android:visibility="invisible"
+                    android:textSize="20sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:id="@+id/noNotification"/>
+            <ListView
+                    android:id="@+id/listIncident"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+            />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <TextView
             android:text="@string/alarmNotification"
