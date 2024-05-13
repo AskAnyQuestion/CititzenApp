@@ -159,7 +159,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         map = mapView.getMapWindow().getMap();
         map.setRotateGesturesEnabled(false);
         map.setNightModeEnabled(isNightMode);
-        map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
+        map.move(position, new Animation(Animation.Type.SMOOTH, 0.5f), null);
         locationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
         locationLayer.setVisible(true);
         locationLayer.setHeadingEnabled(true);
@@ -323,7 +323,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(outputBitmap);
         Paint paint = new Paint();
-        paint.setColor(Color.YELLOW);
+        paint.setColor(Color.RED);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(20);
         paint.setAntiAlias(true);
@@ -382,7 +382,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                         .replace(R.id.frame_layout_home, new IncidentFragment()).commit());
         buttonFindMe.setOnClickListener(v -> {
             if (position != null) {
-                map.move(position, new Animation(Animation.Type.SMOOTH, 1f), null);
+                map.move(position, new Animation(Animation.Type.SMOOTH, 0.5f), null);
             }
         });
         buttonChangeTime.setOnClickListener(v -> {

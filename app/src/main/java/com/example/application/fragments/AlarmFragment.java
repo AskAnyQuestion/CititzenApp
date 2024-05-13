@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
@@ -26,11 +27,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class AlarmFragment extends Fragment {
-
     private View inflatedView = null;
     private ListView listView;
     private TextView clear;
     private TextView noNotification;
+    private ProgressBar progressBarNotification;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -82,6 +83,7 @@ public class AlarmFragment extends Fragment {
                 public void onResponse(@NotNull Call<List<Incident>> call, @NotNull Response<List<Incident>> response) {
                     List<Incident> list = response.body();
                     if (list != null) {
+                        progressBarNotification.setVisibility(View.INVISIBLE);
                         noNotification.setVisibility(View.INVISIBLE);
                         sort(list);
                         if (getActivity() != null) {
@@ -144,5 +146,6 @@ public class AlarmFragment extends Fragment {
         clear = inflatedView.findViewById(R.id.clear);
         listView = inflatedView.findViewById(R.id.listIncident);
         noNotification = inflatedView.findViewById(R.id.noNotification);
+        progressBarNotification = inflatedView.findViewById(R.id.progressBarNotification);
     }
 }

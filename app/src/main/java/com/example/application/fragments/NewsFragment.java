@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ public class NewsFragment extends Fragment {
     private View inflatedView = null;
     private ListView listView;
     private HashMap<Integer, Bitmap> hashMap;
+    private ProgressBar progressBarNews;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private String mParam1;
@@ -123,6 +125,7 @@ public class NewsFragment extends Fragment {
                     }
                     zis.close();
                     /* Материалы */
+                    progressBarNews.setVisibility(View.INVISIBLE);
                     if (getActivity() != null) {
                         NewsAdapter newsAdapter = new NewsAdapter(getContext(), list, hashMap);
                         listView.setAdapter(newsAdapter);
@@ -139,5 +142,6 @@ public class NewsFragment extends Fragment {
 
     private void init() {
         listView = inflatedView.findViewById(R.id.listIncidentNews);
+        progressBarNews = inflatedView.findViewById(R.id.progressBarNews);
     }
 }

@@ -22,6 +22,13 @@
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
             tools:ignore="MissingConstraints" app:layout_constraintVertical_bias="1.0"/>
+    <ProgressBar android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:padding="100dp"
+                 android:visibility="visible"
+                 android:id="@+id/progressBarNews"
+                 android:indeterminateDrawable="@drawable/ic_spinner_ring"
+                 android:indeterminateOnly="true"/>
     <ListView
             android:layout_marginTop="60dp"
             android:id="@+id/listIncidentNews"
