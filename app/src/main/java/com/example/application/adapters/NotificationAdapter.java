@@ -10,10 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.application.R;
-import com.example.application.data.IncidentMap;
 import com.example.application.model.Incident;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationAdapter extends ArrayAdapter<Incident> {

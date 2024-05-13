@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.provider.Settings;
 import android.text.SpannableString;
 import androidx.annotation.NonNull;
@@ -18,7 +19,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import com.example.application.R;
 import com.example.application.Utils;
-import com.example.application.activity.HomeActivity;
 import com.example.application.async.AddNotificationRequestTask;
 import com.example.application.data.NotificationData;
 import com.example.application.model.User;
@@ -37,7 +37,6 @@ import retrofit2.Response;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PushNotificationService extends FirebaseMessagingService {
     private final double MESSAGE_SENDING_RADIUS = 1;
@@ -54,6 +53,7 @@ public class PushNotificationService extends FirebaseMessagingService {
         userAPI.userUpdate(user);
         super.onNewToken(token);
     }
+
 
     @Override
     public void onMessageReceived(@NonNull @NotNull RemoteMessage message) {
@@ -99,26 +99,32 @@ public class PushNotificationService extends FirebaseMessagingService {
             }
 
             @Override
-            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {}
+            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+            }
         });
     }
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     private void sendMessage(String event, double distance) {
-        Intent resultIntent = new Intent(this, HomeActivity.class);
-        resultIntent.putExtra("notification", true);
-
-        @SuppressLint("UnspecifiedImmutableFlag")
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pendingIntent = PendingIntent.getActivity(this,
+                    0, new Intent(this, getClass()).addFlags(
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        } else {
+            pendingIntent = PendingIntent.getActivity(this,
+                    0, new Intent(this, getClass()).addFlags(
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         final String CHANNEL_ID = "CITIZEN_ID_CHANNEL";
         final String CHANNEL_NAME = "CITIZEN_CHANNEL";
-
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_DEFAULT);
-
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -128,7 +134,7 @@ public class PushNotificationService extends FirebaseMessagingService {
                         .addLine(distance + " км. от вас"))
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(resultPendingIntent)
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .build();
         notificationManager.notify(1, notification);

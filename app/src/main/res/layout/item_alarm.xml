@@ -7,8 +7,10 @@
         android:layout_height="match_parent">
     <TextView
             android:text=""
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:layout_marginStart="20dp"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center|left"
             android:layout_width="match_parent"
             android:layout_height="25dp"
@@ -17,7 +19,8 @@
     <TextView
             android:text=""
             android:textSize="15sp"
-            android:textColor="#525252"
+            android:textColor="#A1A1A1"
+            android:fontFamily="sans-serif-medium"
             android:layout_marginStart="20dp"
             android:gravity="center|left"
             android:layout_width="match_parent"
