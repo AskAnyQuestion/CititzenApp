@@ -2,22 +2,39 @@
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:orientation="vertical"
         android:screenOrientation="portrait"
         android:layout_height="match_parent">
-    <TextView
-            android:text=""
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginStart="20dp"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center|left"
+
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="25dp"
-            android:id="@+id/textDescription"
-            tools:ignore="RtlHardcoded"/>
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            tools:ignore="ExtraText,
+            UseCompoundDrawables,
+            UselessLeaf">
+        <ImageView android:layout_width="25dp"
+                   android:layout_height="25dp"
+                   android:padding="9dp"
+                   android:layout_marginBottom="5dp"
+                   android:contentDescription="TODO"
+                   app:srcCompat="@drawable/circle"
+                   tools:ignore="ContentDescription,
+                   HardcodedText"/>
+        <TextView
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:layout_marginBottom="5dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center|left"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:id="@+id/textDescription"
+                tools:ignore="RtlHardcoded"/>
+    </LinearLayout>
     <TextView
             android:text=""
             android:textSize="15sp"

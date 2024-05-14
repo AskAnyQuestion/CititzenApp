@@ -1,7 +1,9 @@
 package com.example.application.fragments;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -16,6 +18,9 @@ import com.example.application.async.GetNewsMaterialRequestTask;
 import com.example.application.async.GetNewsRequestTask;
 import com.example.application.exception.SERVER;
 import com.example.application.model.News;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Task;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
@@ -127,8 +132,13 @@ public class NewsFragment extends Fragment {
                     /* Материалы */
                     progressBarNews.setVisibility(View.INVISIBLE);
                     if (getActivity() != null) {
-                        NewsAdapter newsAdapter = new NewsAdapter(getContext(), list, hashMap);
-                        listView.setAdapter(newsAdapter);
+                        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(getActivity());
+                        @SuppressLint("MissingPermission")
+                        Task<Location> task = client.getLastLocation();
+                        task.addOnSuccessListener(location ->  {
+                            NewsAdapter newsAdapter = new NewsAdapter(getContext(), list, hashMap, location);
+                            listView.setAdapter(newsAdapter);
+                        });
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -136,7 +146,8 @@ public class NewsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {}
+            public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
+            }
         });
     }
 

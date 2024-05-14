@@ -24,12 +24,12 @@ public class Utils {
     }
 
     public static double getLocation(Task<Location> task, Point point) {
-        AtomicReference<Double> atomic = new AtomicReference<>((double) 0);
-        task.addOnSuccessListener(location -> {
-            Point p = new Point(location.getLatitude(), location.getLongitude());
-            atomic.set(Utils.calculateDistanceBetweenPoints(point, p));
+        AtomicReference<Double> value = new AtomicReference<>(0.0);
+        task.addOnCompleteListener(location -> {
+            Point p = new Point(location.getResult().getLatitude(), location.getResult().getLongitude());
+            value.set(Utils.calculateDistanceBetweenPoints(point, p));
         });
-        return atomic.get();
+        return value.get();
     }
 
 

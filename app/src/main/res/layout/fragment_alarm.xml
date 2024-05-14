@@ -73,12 +73,11 @@
                 android:layout_height="match_parent">
             <ProgressBar android:layout_width="match_parent"
                          android:layout_height="match_parent"
-                         android:padding="100dp"
+                         android:padding="130dp"
                          android:visibility="visible"
                          android:id="@+id/progressBarNotification"
                          android:indeterminateDrawable="@drawable/ic_spinner_ring"
                          android:indeterminateOnly="true"/>
-
             <TextView
                     android:text="@string/noNotification"
                     android:gravity="center"

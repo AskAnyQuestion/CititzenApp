@@ -24,7 +24,7 @@
             tools:ignore="MissingConstraints" app:layout_constraintVertical_bias="1.0"/>
     <ProgressBar android:layout_width="match_parent"
                  android:layout_height="match_parent"
-                 android:padding="100dp"
+                 android:padding="130dp"
                  android:visibility="visible"
                  android:id="@+id/progressBarNews"
                  android:indeterminateDrawable="@drawable/ic_spinner_ring"

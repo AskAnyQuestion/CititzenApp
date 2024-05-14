@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class NewsAdapter extends ArrayAdapter<News> {
     private final Context context;
@@ -34,12 +35,14 @@ public class NewsAdapter extends ArrayAdapter<News> {
     private final HashMap<Integer, Bitmap> hashMap;
     private TextView hourAndKm, description, street, addition;
     private ImageView image;
+    private final Location location;
 
-    public NewsAdapter(Context context, List<News> news, HashMap<Integer, Bitmap> hashMap) {
+    public NewsAdapter(Context context, List<News> news, HashMap<Integer, Bitmap> hashMap, Location location) {
         super(context, R.layout.item_alarm, news);
         this.context = context;
         this.news = news;
         this.hashMap = hashMap;
+        this.location = location;
     }
 
 
@@ -66,12 +69,9 @@ public class NewsAdapter extends ArrayAdapter<News> {
     @SuppressLint("SetTextI18n")
     private void initNews(int position) {
         News n = news.get(position);
-        FusedLocationProviderClient client =
-                LocationServices.getFusedLocationProviderClient(getContext());
-        @SuppressLint("MissingPermission")
-        Task<Location> task = client.getLastLocation();
         Point point = new com.yandex.mapkit.geometry.Point(n.getLatitude(), n.getLongitude());
-        double distance = Utils.getLocation(task, point);
+        Point p = new Point(location.getLatitude(), location.getLongitude());
+        double distance = Utils.calculateDistanceBetweenPoints(point, p);
         /* Часы и километры */
         long now = new Date().getTime();
         long time = n.getEventTime().getTime();

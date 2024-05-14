@@ -7,8 +7,11 @@ import java.sql.Timestamp;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 
 public class Incident {
@@ -57,7 +60,10 @@ public class Incident {
     }
 
     public Timestamp getTime() {
-        return eventTime;
+        TimeZone moscowTimeZone = TimeZone.getTimeZone(ZoneId.systemDefault());
+        int offsetInMillis = moscowTimeZone.getRawOffset();
+        Timestamp adjustedTime = new Timestamp(eventTime.getTime() + offsetInMillis);
+        return adjustedTime;
     }
 
     @SuppressLint("DefaultLocale")

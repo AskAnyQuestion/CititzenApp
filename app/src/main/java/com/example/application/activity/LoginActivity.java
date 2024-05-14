@@ -24,11 +24,12 @@ import com.example.application.exception.SERVER;
 import com.example.application.data.LoginData;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.messaging.FirebaseMessaging;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.concurrent.ExecutionException;
 
 public class LoginActivity extends AppCompatActivity {
     private DisplayMetrics metrics;
@@ -41,7 +42,11 @@ public class LoginActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        initProfile();
+        try {
+            initProfile();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         initComponents();
@@ -135,13 +140,40 @@ public class LoginActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
     }
 
-    private void initProfile() {
+    private void initProfile() throws ExecutionException, InterruptedException {
         SharedPreferences preferences = this.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         long phone = preferences.getLong("phone", 0);
         String login = preferences.getString("login", null);
         String password = preferences.getString("password", null);
-        if (login != null || password != null || phone != 0)
-            openHomeActivity();
+        if (login == null || password == null || phone == 0)
+            return;
+        LoginData loginData = new LoginData(phone, password);
+        AuthorizationRequestTask task = new AuthorizationRequestTask(loginData);
+        task.execute();
+        Call<Integer> call = task.get();
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
+                Integer t = response.body();
+                if (t != null) {
+                    if (t.equals(200))
+                        openHomeActivity();
+                    else {
+                        @SuppressLint("CommitPrefEdits")
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putLong("phone", 0);
+                        editor.putString("login", null);
+                        editor.putString("password", null);
+                        editor.apply();
+                    }
+                } else
+                    onFailure(call, new Throwable(SERVER.NOT_ACCESS.toString()));
+            }
+            @Override
+            public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                Toast.makeText(LoginActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void openHomeActivity() {
