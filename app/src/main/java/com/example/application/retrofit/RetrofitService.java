@@ -17,7 +17,7 @@ public class RetrofitService {
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
                 .create();
 
-         retrofit = new Retrofit.Builder() // 192.168.43.247 - LTE
+         retrofit = new Retrofit.Builder() // 192.168.43.247 - LTE 192.168.0.104 - PC
                  .baseUrl("http://192.168.0.104:8000")
                  .addConverterFactory(GsonConverterFactory.create(gson))
                  .build();

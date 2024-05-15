@@ -15,7 +15,7 @@ import java.util.TimeZone;
 
 
 public class Incident {
-    protected Integer idIncident;
+    protected int idIncident;
     protected User user;
     protected String eventDescription;
     protected Timestamp eventTime;

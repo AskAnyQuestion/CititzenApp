@@ -84,7 +84,8 @@ public class AlarmFragment extends Fragment {
                     List<Incident> list = response.body();
                     if (list != null) {
                         progressBarNotification.setVisibility(View.INVISIBLE);
-                        noNotification.setVisibility(View.INVISIBLE);
+                        if (list.size() == 0)
+                            noNotification.setVisibility(View.VISIBLE);
                         sort(list);
                         if (getActivity() != null) {
                             NotificationAdapter notificationAdapter = new NotificationAdapter(getActivity(), list);
@@ -124,7 +125,7 @@ public class AlarmFragment extends Fragment {
             ClearIncidentsRequestTask task = new ClearIncidentsRequestTask(data);
             task.execute();
             try {
-                Call <Integer> call = task.get();
+                Call<Integer> call = task.get();
                 call.enqueue(new Callback<>() {
                     @Override
                     public void onResponse(@NotNull Call<Integer> call, @NotNull Response<Integer> response) {
@@ -133,7 +134,8 @@ public class AlarmFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {}
+                    public void onFailure(@NotNull Call<Integer> call, @NotNull Throwable t) {
+                    }
                 });
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);

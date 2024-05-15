@@ -112,7 +112,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         initUserLocation();
     }
 
-    private  void initUserLocation() {
+    private void initUserLocation() {
         if (isLocationPermissionGranted()) {
             FusedLocationProviderClient fusedLocationClient =
                     LocationServices.getFusedLocationProviderClient(this);
@@ -248,6 +248,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
         return new ViewPagerBitmapAdapter(getApplicationContext(), hashMap.get(id));
     }
 
+    private ViewPagerBitmapAdapter getAdapter() {
+        return new ViewPagerBitmapAdapter(getApplicationContext(), this.bitmaps);
+    }
+
     private BottomSheetBehavior.BottomSheetCallback replaceAlpha() {
         BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -286,7 +290,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
                 description.setText(data.getDescription());
                 streetAndKm.setText(data.getAddress() + " - " + kilometers + " км.");
                 imageIncident.setImageBitmap(data.getImage());
-                viewPager.setAdapter(getAdapter(data.getId()));
+                viewPager.setAdapter(data.getId() == 0 ? getAdapter() : getAdapter(data.getId()));
                 BottomSheetBehavior<FrameLayout> bottomSheetBehavior = BottomSheetBehavior.from(layout);
                 bottomSheetBehavior.setPeekHeight((int) (metrics.heightPixels * 0.27), true);
             }
@@ -298,7 +302,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationBarView
 
     private void disappear(MapObject mapObject) {
         final Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(() -> objCollection.remove(mapObject), 10 * 60 * 1000);
+        handler.postDelayed(() -> objCollection.remove(mapObject), 60 * 60 * 1000);
     }
 
     private Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
